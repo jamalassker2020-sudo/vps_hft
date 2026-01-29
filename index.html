@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HFT Ultra 2026</title>
+<title>HFT Ultra FX 2026</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0a0e14;--card:#121820;--border:#1a2030;--txt:#c8d0dc;--dim:#5a6270;--g:#0f6;--r:#f44;--b:#0af;--y:#fc0}
@@ -46,8 +46,8 @@ input[type="text"]:focus{outline:none;border-color:var(--b)}
 <body>
 <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
 <div>
-<h1>⚡ HFT ULTRA <span class="dim">2026</span></h1>
-<small class="dim">29 PAIRS • REAL BINANCE DATA • SMART RISK • AI SIGNALS • MT5 WEBHOOK</small>
+<h1>⚡ HFT ULTRA <span class="y">FX</span> <span class="dim">2026</span></h1>
+<small class="dim">28 FOREX PAIRS • ECB + SIMULATED TICKS • SMART RISK • MT5 WEBHOOK</small>
 </div>
 <div class="row" style="gap:4px">
 <span id="status" class="badge pulse">INIT</span>
@@ -78,10 +78,10 @@ input[type="text"]:focus{outline:none;border-color:var(--b)}
 <div class="col" style="flex:3">
 <div class="card">
 <div class="row" style="justify-content:space-between;margin-bottom:4px">
-<b class="b">📊 MARKET</b>
+<b class="b">📊 FOREX MARKET</b>
 <span id="time" class="dim">--:--:--</span>
 </div>
-<div class="scroll"><table><thead><tr><th>SYM</th><th>BID</th><th>ASK</th><th>Δ</th><th>RSI</th><th>MOM</th><th>SIG</th><th>P&L</th></tr></thead><tbody id="market"></tbody></table></div>
+<div class="scroll"><table><thead><tr><th>PAIR</th><th>BID</th><th>ASK</th><th>SPR</th><th>RSI</th><th>MOM</th><th>SIG</th><th>P&L</th></tr></thead><tbody id="market"></tbody></table></div>
 </div>
 </div>
 <div class="col">
@@ -121,10 +121,10 @@ input[type="text"]:focus{outline:none;border-color:var(--b)}
 <h3>🔗 MT5 Webhook Configuration</h3>
 <div style="margin-bottom:12px">
 <label class="dim" style="display:block;margin-bottom:4px">Webhook URL (your MT5 EA endpoint)</label>
-<input type="text" id="webhookUrl" placeholder="http://localhost:8080/webhook">
+<input type="text" id="webhookUrl" placeholder="http://localhost:5000/webhook">
 </div>
 <div style="margin-bottom:12px">
-<label class="dim" style="display:block;margin-bottom:4px">Secret Key (optional, for authentication)</label>
+<label class="dim" style="display:block;margin-bottom:4px">Secret Key (optional)</label>
 <input type="text" id="webhookSecret" placeholder="your-secret-key">
 </div>
 <div class="grid g2" style="margin-bottom:12px">
@@ -149,56 +149,66 @@ input[type="text"]:focus{outline:none;border-color:var(--b)}
 if(matchMedia('(prefers-color-scheme:light)').matches)document.documentElement.classList.add('light');
 matchMedia('(prefers-color-scheme:light)').onchange=e=>document.documentElement.classList.toggle('light',e.matches);
 
-// Binance Crypto Instruments (29 pairs)
+// =====================================================
+// FOREX INSTRUMENTS (28 pairs)
+// =====================================================
 const SYM=[
-{s:'BTC/USDT',b:'BTCUSDT',p:.01,t:'major',mt5:'BTCUSD'},
-{s:'ETH/USDT',b:'ETHUSDT',p:.01,t:'major',mt5:'ETHUSD'},
-{s:'BNB/USDT',b:'BNBUSDT',p:.01,t:'major',mt5:'BNBUSD'},
-{s:'XRP/USDT',b:'XRPUSDT',p:.0001,t:'alt',mt5:'XRPUSD'},
-{s:'SOL/USDT',b:'SOLUSDT',p:.01,t:'major',mt5:'SOLUSD'},
-{s:'DOGE/USDT',b:'DOGEUSDT',p:.00001,t:'alt',mt5:'DOGEUSD'},
-{s:'ADA/USDT',b:'ADAUSDT',p:.0001,t:'alt',mt5:'ADAUSD'},
-{s:'AVAX/USDT',b:'AVAXUSDT',p:.01,t:'alt',mt5:'AVAXUSD'},
-{s:'LINK/USDT',b:'LINKUSDT',p:.001,t:'alt',mt5:'LINKUSD'},
-{s:'DOT/USDT',b:'DOTUSDT',p:.001,t:'alt',mt5:'DOTUSD'},
-{s:'MATIC/USDT',b:'MATICUSDT',p:.0001,t:'alt',mt5:'MATICUSD'},
-{s:'SHIB/USDT',b:'SHIBUSDT',p:.00000001,t:'meme',mt5:'SHIBUSD'},
-{s:'LTC/USDT',b:'LTCUSDT',p:.01,t:'major',mt5:'LTCUSD'},
-{s:'TRX/USDT',b:'TRXUSDT',p:.0001,t:'alt',mt5:'TRXUSD'},
-{s:'ATOM/USDT',b:'ATOMUSDT',p:.001,t:'alt',mt5:'ATOMUSD'},
-{s:'UNI/USDT',b:'UNIUSDT',p:.001,t:'defi',mt5:'UNIUSD'},
-{s:'ETC/USDT',b:'ETCUSDT',p:.01,t:'alt',mt5:'ETCUSD'},
-{s:'XLM/USDT',b:'XLMUSDT',p:.0001,t:'alt',mt5:'XLMUSD'},
-{s:'NEAR/USDT',b:'NEARUSDT',p:.001,t:'alt',mt5:'NEARUSD'},
-{s:'APT/USDT',b:'APTUSDT',p:.01,t:'alt',mt5:'APTUSD'},
-{s:'FIL/USDT',b:'FILUSDT',p:.001,t:'alt',mt5:'FILUSD'},
-{s:'ARB/USDT',b:'ARBUSDT',p:.0001,t:'l2',mt5:'ARBUSD'},
-{s:'OP/USDT',b:'OPUSDT',p:.0001,t:'l2',mt5:'OPUSD'},
-{s:'INJ/USDT',b:'INJUSDT',p:.01,t:'defi',mt5:'INJUSD'},
-{s:'SUI/USDT',b:'SUIUSDT',p:.0001,t:'alt',mt5:'SUIUSD'},
-{s:'PEPE/USDT',b:'PEPEUSDT',p:.000000001,t:'meme',mt5:'PEPEUSD'},
-{s:'WIF/USDT',b:'WIFUSDT',p:.0001,t:'meme',mt5:'WIFUSD'},
-{s:'RENDER/USDT',b:'RENDERUSDT',p:.001,t:'ai',mt5:'RENDERUSD'},
-{s:'FET/USDT',b:'FETUSDT',p:.0001,t:'ai',mt5:'FETUSD'}
+  // Major Pairs
+  {s:'EUR/USD',base:'EUR',quote:'USD',p:0.0001,t:'major',mt5:'EURUSD',spread:1.2},
+  {s:'GBP/USD',base:'GBP',quote:'USD',p:0.0001,t:'major',mt5:'GBPUSD',spread:1.5},
+  {s:'USD/JPY',base:'USD',quote:'JPY',p:0.01,t:'major',mt5:'USDJPY',spread:1.3},
+  {s:'USD/CHF',base:'USD',quote:'CHF',p:0.0001,t:'major',mt5:'USDCHF',spread:1.8},
+  {s:'AUD/USD',base:'AUD',quote:'USD',p:0.0001,t:'major',mt5:'AUDUSD',spread:1.4},
+  {s:'USD/CAD',base:'USD',quote:'CAD',p:0.0001,t:'major',mt5:'USDCAD',spread:1.6},
+  {s:'NZD/USD',base:'NZD',quote:'USD',p:0.0001,t:'major',mt5:'NZDUSD',spread:1.8},
+  
+  // Euro Crosses
+  {s:'EUR/GBP',base:'EUR',quote:'GBP',p:0.0001,t:'cross',mt5:'EURGBP',spread:1.5},
+  {s:'EUR/JPY',base:'EUR',quote:'JPY',p:0.01,t:'cross',mt5:'EURJPY',spread:1.8},
+  {s:'EUR/CHF',base:'EUR',quote:'CHF',p:0.0001,t:'cross',mt5:'EURCHF',spread:2.0},
+  {s:'EUR/AUD',base:'EUR',quote:'AUD',p:0.0001,t:'cross',mt5:'EURAUD',spread:2.5},
+  {s:'EUR/CAD',base:'EUR',quote:'CAD',p:0.0001,t:'cross',mt5:'EURCAD',spread:2.2},
+  {s:'EUR/NZD',base:'EUR',quote:'NZD',p:0.0001,t:'cross',mt5:'EURNZD',spread:3.0},
+  
+  // GBP Crosses
+  {s:'GBP/JPY',base:'GBP',quote:'JPY',p:0.01,t:'cross',mt5:'GBPJPY',spread:2.5},
+  {s:'GBP/CHF',base:'GBP',quote:'CHF',p:0.0001,t:'cross',mt5:'GBPCHF',spread:2.8},
+  {s:'GBP/AUD',base:'GBP',quote:'AUD',p:0.0001,t:'cross',mt5:'GBPAUD',spread:3.0},
+  {s:'GBP/CAD',base:'GBP',quote:'CAD',p:0.0001,t:'cross',mt5:'GBPCAD',spread:2.8},
+  {s:'GBP/NZD',base:'GBP',quote:'NZD',p:0.0001,t:'cross',mt5:'GBPNZD',spread:3.5},
+  
+  // Other Crosses
+  {s:'AUD/JPY',base:'AUD',quote:'JPY',p:0.01,t:'cross',mt5:'AUDJPY',spread:2.0},
+  {s:'AUD/NZD',base:'AUD',quote:'NZD',p:0.0001,t:'cross',mt5:'AUDNZD',spread:2.5},
+  {s:'AUD/CAD',base:'AUD',quote:'CAD',p:0.0001,t:'cross',mt5:'AUDCAD',spread:2.2},
+  {s:'AUD/CHF',base:'AUD',quote:'CHF',p:0.0001,t:'cross',mt5:'AUDCHF',spread:2.5},
+  {s:'NZD/JPY',base:'NZD',quote:'JPY',p:0.01,t:'cross',mt5:'NZDJPY',spread:2.5},
+  {s:'NZD/CAD',base:'NZD',quote:'CAD',p:0.0001,t:'cross',mt5:'NZDCAD',spread:2.8},
+  {s:'NZD/CHF',base:'NZD',quote:'CHF',p:0.0001,t:'cross',mt5:'NZDCHF',spread:3.0},
+  {s:'CAD/JPY',base:'CAD',quote:'JPY',p:0.01,t:'cross',mt5:'CADJPY',spread:2.2},
+  {s:'CAD/CHF',base:'CAD',quote:'CHF',p:0.0001,t:'cross',mt5:'CADCHF',spread:2.5},
+  
+  // Gold
+  {s:'XAU/USD',base:'XAU',quote:'USD',p:0.01,t:'metal',mt5:'XAUUSD',spread:25}
 ];
 
-// Enhanced Config - Conservative HFT
+// Enhanced Config - Conservative Forex HFT
 const C={
   start:100,
-  baseLot:.01,
+  baseLot:0.01,
   tp:15,           // 15 pip TP (3:1 RR)
   sl:5,            // 5 pip SL tight
   trail:6,         // Trail after 6 pips
   maxPos:6,        // Max 6 positions
   maxDD:5,         // 5% max drawdown circuit breaker
   dailyLossLimit:3,// 3% daily loss limit
-  cooldown:3000,   // 3s cooldown
+  cooldown:5000,   // 5s cooldown for forex
   rsiPeriod:14,
   minRSI:25,       // Oversold
   maxRSI:75,       // Overbought
   minStrength:3,   // Need 3+ strategy confirmations
-  spreadMax:2,     // Max 2 pip spread to enter
-  corrThreshold:.7 // Correlation threshold for hedging
+  spreadMax:3,     // Max 3 pip spread to enter
+  corrThreshold:0.7
 };
 
 // =====================================================
@@ -214,7 +224,6 @@ let webhookConfig = {
   errorCount: 0
 };
 
-// Load webhook config from URL hash or defaults
 function loadWebhookConfig() {
   try {
     const hash = location.hash.slice(1);
@@ -236,7 +245,7 @@ function saveWebhookConfig() {
   webhookConfig.openEnabled = document.getElementById('whOpenEnabled').checked;
   webhookConfig.closeEnabled = document.getElementById('whCloseEnabled').checked;
   
-  save(); // Save to URL hash
+  save();
   updateWebhookUI();
   closeWebhookModal();
   log('🔗 Webhook config saved', 'b');
@@ -265,7 +274,6 @@ function closeWebhookModal() {
   document.getElementById('webhookModal').style.display = 'none';
 }
 
-// Generate unique trade ID
 function generateTradeId() {
   return 'HFT-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
 }
@@ -273,12 +281,6 @@ function generateTradeId() {
 // =====================================================
 // WEBHOOK SENDER - MT5 INTEGRATION
 // =====================================================
-
-/**
- * Sends webhook to MT5 EA
- * @param {string} action - 'OPEN' or 'CLOSE'
- * @param {object} tradeData - Trade details
- */
 async function sendWebhook(action, tradeData) {
   if (!webhookConfig.url) return;
   if (action === 'OPEN' && !webhookConfig.openEnabled) return;
@@ -286,52 +288,31 @@ async function sendWebhook(action, tradeData) {
 
   const symData = SYM.find(s => s.s === tradeData.sym);
   
-  // Build webhook payload - MT5 compatible format
   const payload = {
-    // Header
-    action: action,                           // "OPEN" or "CLOSE"
-    source: "HFT-ULTRA-2026",                 // Signal source identifier
-    version: "1.0",                           // Protocol version
-    timestamp: new Date().toISOString(),      // ISO 8601 timestamp
-    timestamp_unix: Date.now(),               // Unix timestamp (ms)
-    
-    // Trade identification
+    action: action,
+    source: "HFT-ULTRA-FX-2026",
+    version: "1.0",
+    timestamp: new Date().toISOString(),
+    timestamp_unix: Date.now(),
     trade_id: tradeData.id || generateTradeId(),
-    
-    // Symbol mapping
-    symbol: tradeData.sym,                    // Original symbol (BTC/USDT)
-    symbol_mt5: symData?.mt5 || tradeData.sym.replace('/USDT', 'USD'), // MT5 symbol
-    symbol_binance: symData?.b || '',         // Binance symbol
-    
-    // Trade direction
-    direction: tradeData.type,                // "BUY" or "SELL"
-    order_type: tradeData.type === 'BUY' ? 0 : 1, // MT5: 0=BUY, 1=SELL
-    
-    // Prices
+    symbol: tradeData.sym,
+    symbol_mt5: symData?.mt5 || tradeData.sym.replace('/', ''),
+    direction: tradeData.type,
+    order_type: tradeData.type === 'BUY' ? 0 : 1,
     entry_price: tradeData.entry,
     current_price: tradeData.currentPrice || tradeData.entry,
-    
-    // Risk management
     take_profit: tradeData.tp,
     stop_loss: tradeData.sl,
     trailing_stop: tradeData.trail || null,
-    
-    // Position sizing
     lot_size: tradeData.lot,
     pip_value: tradeData.pipValue,
     pip_size: tradeData.pip,
-    
-    // Signal strength
     signal_strength: tradeData.strength || 0,
-    
-    // For CLOSE actions
     exit_price: action === 'CLOSE' ? tradeData.exitPrice : null,
-    exit_reason: action === 'CLOSE' ? tradeData.reason : null, // "TP", "SL", "TRAIL", "MANUAL"
+    exit_reason: action === 'CLOSE' ? tradeData.reason : null,
     pnl_pips: action === 'CLOSE' ? tradeData.pips : null,
     pnl_usd: action === 'CLOSE' ? tradeData.pnl : null,
     duration_ms: action === 'CLOSE' ? (Date.now() - tradeData.time) : null,
-    
-    // Account snapshot
     account: {
       balance: S.bal,
       equity: S.bal + getUnrealized(),
@@ -339,8 +320,6 @@ async function sendWebhook(action, tradeData) {
       total_trades: S.wins + S.losses,
       win_rate: S.wins + S.losses > 0 ? (S.wins / (S.wins + S.losses) * 100).toFixed(2) : 0
     },
-    
-    // Authentication (if secret key is set)
     auth: webhookConfig.secret ? {
       secret: webhookConfig.secret,
       signature: btoa(webhookConfig.secret + ':' + Date.now())
@@ -352,7 +331,7 @@ async function sendWebhook(action, tradeData) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Signal-Source': 'HFT-ULTRA-2026',
+        'X-Signal-Source': 'HFT-ULTRA-FX-2026',
         'X-Signal-Action': action,
         ...(webhookConfig.secret && { 'X-Auth-Key': webhookConfig.secret })
       },
@@ -371,14 +350,12 @@ async function sendWebhook(action, tradeData) {
     webhookConfig.errorCount++;
     webhookConfig.lastStatus = 'ERR';
     console.log('Webhook error:', JSON.stringify(err.message));
-    // Don't spam log with webhook errors
     if (webhookConfig.errorCount <= 3) {
       log(`⚠️ WH Error: ${err.message}`, 'y');
     }
   }
 }
 
-// Test webhook connection
 async function testWebhook() {
   const url = document.getElementById('webhookUrl').value.trim();
   const resultEl = document.getElementById('webhookTestResult');
@@ -390,24 +367,21 @@ async function testWebhook() {
 
   resultEl.innerHTML = '<span class="y">🔄 Testing...</span>';
 
-  const testPayload = {
-    action: 'TEST',
-    source: 'HFT-ULTRA-2026',
-    version: '1.0',
-    timestamp: new Date().toISOString(),
-    timestamp_unix: Date.now(),
-    message: 'Connection test from HFT Ultra 2026'
-  };
-
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Signal-Source': 'HFT-ULTRA-2026',
+        'X-Signal-Source': 'HFT-ULTRA-FX-2026',
         'X-Signal-Action': 'TEST'
       },
-      body: JSON.stringify(testPayload),
+      body: JSON.stringify({
+        action: 'TEST',
+        source: 'HFT-ULTRA-FX-2026',
+        version: '1.0',
+        timestamp: new Date().toISOString(),
+        message: 'Connection test from HFT Ultra FX 2026'
+      }),
       mode: 'cors'
     });
 
@@ -424,7 +398,7 @@ async function testWebhook() {
 // State
 let S=load()||fresh();
 let prices={},history={},lastTrade={},logs=[],ticks=0,dailyPnL=0,dayStart=new Date().toDateString();
-let binanceData={};
+let ecbRates={};
 
 function fresh(){return{bal:C.start,pos:[],wins:0,losses:0,grossWin:0,grossLoss:0,eq:[C.start],streak:0,best:C.start,peak:C.start,returns:[]}}
 
@@ -457,320 +431,350 @@ function save(){
   } catch(e) {}
 }
 
-function reset(){S=fresh();logs=[];prices={};history={};dailyPnL=0;binanceData={};save();render()}
+function reset(){S=fresh();logs=[];prices={};history={};dailyPnL=0;ecbRates={};save();render()}
 
-// Fetch real prices from Binance public API (no API key needed)
-async function fetchBinancePrices(){
+// =====================================================
+// FOREX PRICE DATA - ECB + Simulated Ticks
+// =====================================================
+
+// Fetch ECB rates via Frankfurter API (free, CORS enabled)
+async function fetchECBRates(){
   try{
-    // Fetch book tickers (bid/ask) for all symbols
-    const symbols=SYM.map(s=>s.b);
-    const r=await fetch('https://api.binance.com/api/v3/ticker/bookTicker');
-    const data=await r.json();
-
-    // Create lookup
-    data.forEach(t=>{
-      binanceData[t.symbol]={
-        bid:parseFloat(t.bidPrice),
-        ask:parseFloat(t.askPrice),
-        bidQty:parseFloat(t.bidQty),
-        askQty:parseFloat(t.askQty)
-      };
-    });
-
-    // Also fetch 24hr changes for momentum
-    const r2=await fetch('https://api.binance.com/api/v3/ticker/24hr');
-    const data24=await r2.json();
-    data24.forEach(t=>{
-      if(binanceData[t.symbol]){
-        binanceData[t.symbol].change24=parseFloat(t.priceChangePercent);
-        binanceData[t.symbol].high24=parseFloat(t.highPrice);
-        binanceData[t.symbol].low24=parseFloat(t.lowPrice);
-        binanceData[t.symbol].volume=parseFloat(t.quoteVolume);
-      }
-    });
-
-    document.getElementById('api').textContent='API:✓';
+    // Fetch latest rates from ECB via Frankfurter
+    const r = await fetch('https://api.frankfurter.app/latest?from=USD');
+    const data = await r.json();
+    
+    // Store rates (all vs USD)
+    ecbRates = {
+      'USD': 1,
+      'EUR': 1 / data.rates.EUR, // EUR/USD
+      'GBP': 1 / data.rates.GBP, // GBP/USD
+      'JPY': data.rates.JPY,     // USD/JPY
+      'CHF': data.rates.CHF,     // USD/CHF
+      'AUD': 1 / data.rates.AUD, // AUD/USD
+      'CAD': data.rates.CAD,     // USD/CAD
+      'NZD': 1 / data.rates.NZD, // NZD/USD
+    };
+    
+    // Also fetch XAU (gold) - use approximate market rate
+    // ECB doesn't provide gold, so we'll simulate around ~2650
+    ecbRates['XAU'] = 2650 + (Math.random() - 0.5) * 20;
+    
+    document.getElementById('api').textContent='API:ECB✓';
     document.getElementById('api').className='badge on';
     return true;
   }catch(e){
-    console.log('Binance API error:',JSON.stringify(e));
-    document.getElementById('api').textContent='API:ERR';
-    document.getElementById('api').className='badge off';
-    return false;
+    console.log('ECB API error:', JSON.stringify(e));
+    // Use fallback rates if API fails
+    ecbRates = {
+      'USD': 1,
+      'EUR': 1.0850,
+      'GBP': 1.2650,
+      'JPY': 149.50,
+      'CHF': 0.8850,
+      'AUD': 0.6550,
+      'CAD': 1.3550,
+      'NZD': 0.6150,
+      'XAU': 2650
+    };
+    document.getElementById('api').textContent='API:SIM';
+    document.getElementById('api').className='badge warn';
+    return true;
   }
 }
 
-// Price history for indicators
-function updateHistory(sym,price){
-  if(!history[sym])history[sym]=[];
-  history[sym].push(price);
-  if(history[sym].length>50)history[sym].shift();
-}
-
-// RSI Calculation
-function calcRSI(sym){
-  const h=history[sym];
-  if(!h||h.length<C.rsiPeriod+1)return 50;
-  let gains=0,losses=0;
-  for(let i=h.length-C.rsiPeriod;i<h.length;i++){
-    const diff=h[i]-h[i-1];
-    if(diff>0)gains+=diff;else losses-=diff;
+// Calculate cross rate from base rates
+function getCrossRate(base, quote) {
+  if (base === 'USD') {
+    return ecbRates[quote] || 1;
+  } else if (quote === 'USD') {
+    return ecbRates[base] || 1;
+  } else {
+    // Cross rate: BASE/QUOTE = (BASE/USD) / (QUOTE/USD)
+    const baseUSD = ecbRates[base] || 1;
+    const quoteUSD = ecbRates[quote] || 1;
+    
+    // Handle JPY pairs
+    if (quote === 'JPY') {
+      return baseUSD * ecbRates['JPY'];
+    }
+    if (base === 'JPY') {
+      return 1 / (quoteUSD * ecbRates['JPY']);
+    }
+    
+    return baseUSD / quoteUSD;
   }
-  if(losses===0)return 100;
-  const rs=gains/losses;
-  return 100-(100/(1+rs));
 }
 
-// Momentum (Rate of Change)
-function calcMomentum(sym){
-  const h=history[sym];
-  if(!h||h.length<10)return 0;
-  return((h[h.length-1]-h[h.length-10])/h[h.length-10])*100;
+// Simulate realistic forex tick movement
+function simulateTick(sym, basePrice) {
+  const pip = sym.p;
+  const volatility = sym.t === 'metal' ? 0.5 : (sym.t === 'major' ? 0.3 : 0.4);
+  
+  // Random walk with slight mean reversion
+  const change = (Math.random() - 0.5) * volatility * pip * 10;
+  
+  return basePrice + change;
 }
 
-// Volatility (ATR-like)
-function calcVolatility(sym){
-  const h=history[sym];
-  if(!h||h.length<10)return 1;
-  let sum=0;
-  for(let i=1;i<Math.min(h.length,10);i++)sum+=Math.abs(h[i]-h[i-1]);
-  return sum/9;
-}
-
-// Correlation check for crypto
-function getCorrelatedPairs(sym){
-  const corr={
-    'BTC/USDT':['ETH/USDT','SOL/USDT'],
-    'ETH/USDT':['BTC/USDT','SOL/USDT'],
-    'SOL/USDT':['ETH/USDT','AVAX/USDT'],
-    'DOGE/USDT':['SHIB/USDT','PEPE/USDT'],
-    'SHIB/USDT':['DOGE/USDT','PEPE/USDT'],
-    'ARB/USDT':['OP/USDT'],
-    'OP/USDT':['ARB/USDT'],
-    'RENDER/USDT':['FET/USDT'],
-    'FET/USDT':['RENDER/USDT']
-  };
-  return corr[sym]||[];
-}
-
-// Update prices from real Binance data
+// Update prices with simulated ticks
 function updatePrices(){
-  SYM.forEach(sym=>{
-    const bd=binanceData[sym.b];
-    if(!bd)return;
-
-    const prevMid=prices[sym.s]?.mid||((bd.bid+bd.ask)/2);
-    const mid=(bd.bid+bd.ask)/2;
-
-    updateHistory(sym.s,mid);
-
-    const spreadPips=(bd.ask-bd.bid)/sym.p;
-    const change=(mid-prevMid)/sym.p;
-
-    prices[sym.s]={
-      bid:bd.bid,
-      ask:bd.ask,
-      mid:mid,
-      change:change,
-      spread:spreadPips,
-      pip:sym.p,
-      type:sym.t,
-      change24:bd.change24||0,
-      volume:bd.volume||0
+  SYM.forEach(sym => {
+    // Calculate base mid price from ECB rates
+    let baseMid = getCrossRate(sym.base, sym.quote);
+    
+    // Add simulated tick movement
+    const prevMid = prices[sym.s]?.mid || baseMid;
+    const newMid = simulateTick(sym, prevMid);
+    
+    // Mean reversion toward ECB rate
+    const reversion = (baseMid - newMid) * 0.01;
+    const mid = newMid + reversion;
+    
+    updateHistory(sym.s, mid);
+    
+    // Calculate bid/ask with spread
+    const spreadPips = sym.spread * (0.8 + Math.random() * 0.4); // Variable spread
+    const halfSpread = (spreadPips * sym.p) / 2;
+    
+    const bid = mid - halfSpread;
+    const ask = mid + halfSpread;
+    const change = prices[sym.s] ? (mid - prices[sym.s].mid) / sym.p : 0;
+    
+    prices[sym.s] = {
+      bid: bid,
+      ask: ask,
+      mid: mid,
+      change: change,
+      spread: spreadPips,
+      pip: sym.p,
+      type: sym.t
     };
   });
   ticks++;
 }
 
-// Enhanced AI Signal Generation
+// Price history for indicators
+function updateHistory(sym, price){
+  if(!history[sym]) history[sym] = [];
+  history[sym].push(price);
+  if(history[sym].length > 50) history[sym].shift();
+}
+
+// RSI Calculation
+function calcRSI(sym){
+  const h = history[sym];
+  if(!h || h.length < C.rsiPeriod + 1) return 50;
+  let gains = 0, losses = 0;
+  for(let i = h.length - C.rsiPeriod; i < h.length; i++){
+    const diff = h[i] - h[i-1];
+    if(diff > 0) gains += diff;
+    else losses -= diff;
+  }
+  if(losses === 0) return 100;
+  const rs = gains / losses;
+  return 100 - (100 / (1 + rs));
+}
+
+// Momentum (Rate of Change)
+function calcMomentum(sym){
+  const h = history[sym];
+  if(!h || h.length < 10) return 0;
+  return ((h[h.length-1] - h[h.length-10]) / h[h.length-10]) * 100;
+}
+
+// Volatility
+function calcVolatility(sym){
+  const h = history[sym];
+  if(!h || h.length < 10) return 1;
+  let sum = 0;
+  for(let i = 1; i < Math.min(h.length, 10); i++){
+    sum += Math.abs(h[i] - h[i-1]);
+  }
+  return sum / 9;
+}
+
+// Forex correlation pairs
+function getCorrelatedPairs(sym){
+  const corr = {
+    'EUR/USD': ['GBP/USD', 'EUR/GBP'],
+    'GBP/USD': ['EUR/USD', 'EUR/GBP'],
+    'USD/JPY': ['EUR/JPY', 'GBP/JPY'],
+    'EUR/JPY': ['USD/JPY', 'GBP/JPY'],
+    'GBP/JPY': ['USD/JPY', 'EUR/JPY'],
+    'AUD/USD': ['NZD/USD', 'AUD/NZD'],
+    'NZD/USD': ['AUD/USD', 'AUD/NZD'],
+    'USD/CHF': ['EUR/CHF', 'EUR/USD'],
+    'USD/CAD': ['AUD/CAD', 'EUR/CAD'],
+    'XAU/USD': ['EUR/USD'] // Gold correlates with EUR
+  };
+  return corr[sym] || [];
+}
+
+// Enhanced AI Signal Generation for Forex
 function getSignal(sym){
-  const p=prices[sym];
-  if(!p)return{score:0,strength:0,sig:null,rsi:50,mom:0};
+  const p = prices[sym];
+  if(!p) return {score: 0, strength: 0, sig: null, rsi: 50, mom: 0};
 
-  const rsi=calcRSI(sym);
-  const mom=calcMomentum(sym);
-  const vol=calcVolatility(sym);
+  const rsi = calcRSI(sym);
+  const mom = calcMomentum(sym);
+  const vol = calcVolatility(sym);
 
-  let score=0,strength=0;
+  let score = 0, strength = 0;
 
-  // 1. RSI Strategy (Oversold/Overbought)
-  if(rsi<C.minRSI){score+=20;strength++;}
-  else if(rsi>C.maxRSI){score-=20;strength++;}
-  else if(rsi<40){score+=10;}
-  else if(rsi>60){score-=10;}
+  // 1. RSI Strategy
+  if(rsi < C.minRSI) { score += 20; strength++; }
+  else if(rsi > C.maxRSI) { score -= 20; strength++; }
+  else if(rsi < 40) { score += 10; }
+  else if(rsi > 60) { score -= 10; }
 
   // 2. Momentum Confirmation
-  if(mom>0.05&&rsi<50){score+=15;strength++;}
-  else if(mom<-0.05&&rsi>50){score-=15;strength++;}
+  if(mom > 0.02 && rsi < 50) { score += 15; strength++; }
+  else if(mom < -0.02 && rsi > 50) { score -= 15; strength++; }
 
-  // 3. Trend Following (price above/below MA)
-  const h=history[sym];
-  if(h&&h.length>=20){
-    const ma20=h.slice(-20).reduce((a,b)=>a+b,0)/20;
-    if(p.mid>ma20&&mom>0){score+=12;strength++;}
-    else if(p.mid<ma20&&mom<0){score-=12;strength++;}
+  // 3. Trend Following (MA)
+  const h = history[sym];
+  if(h && h.length >= 20){
+    const ma20 = h.slice(-20).reduce((a,b) => a + b, 0) / 20;
+    if(p.mid > ma20 && mom > 0) { score += 12; strength++; }
+    else if(p.mid < ma20 && mom < 0) { score -= 12; strength++; }
   }
 
-  // 4. Volatility Filter - prefer low vol entries
-  if(vol<p.mid*0.001){strength++;}
+  // 4. Volatility Filter
+  if(vol < p.mid * 0.0005) { strength++; }
 
-  // 5. 24hr Change momentum
-  if(p.change24){
-    if(p.change24>2&&rsi<60){score+=10;strength++;}
-    else if(p.change24<-2&&rsi>40){score-=10;strength++;}
-  }
-
-  // 6. BTC correlation for altcoins
-  if(sym!=='BTC/USDT'){
-    const btc=prices['BTC/USDT'];
-    if(btc){
-      if(btc.change>0&&p.change>0){strength++;}
-      else if(btc.change<0&&p.change<0){strength++;}
+  // 5. USD strength check (for USD pairs)
+  if(sym.includes('USD')){
+    const eurusd = prices['EUR/USD'];
+    if(eurusd){
+      if(sym.startsWith('USD') && eurusd.change < 0) { strength++; } // USD strong
+      else if(sym.endsWith('USD') && eurusd.change > 0) { strength++; } // USD weak
     }
   }
 
-  // 7. Cross-pair confirmation
-  const corr=getCorrelatedPairs(sym);
-  corr.forEach(c=>{
-    const cp=prices[c];
+  // 6. Cross-pair confirmation
+  const corr = getCorrelatedPairs(sym);
+  corr.forEach(c => {
+    const cp = prices[c];
     if(cp){
-      if((score>0&&cp.change>0)||(score<0&&cp.change<0))strength++;
+      if((score > 0 && cp.change > 0) || (score < 0 && cp.change < 0)) strength++;
     }
   });
 
-  // Spread filter - no trade if spread too wide
-  if(p.spread>C.spreadMax)return{score,strength:0,sig:null,rsi,mom};
+  // Spread filter
+  if(p.spread > C.spreadMax) return {score, strength: 0, sig: null, rsi: Math.round(rsi), mom: mom.toFixed(3)};
 
-  let sig=null;
-  if(score>=25&&strength>=C.minStrength)sig='BUY';
-  else if(score<=-25&&strength>=C.minStrength)sig='SELL';
+  let sig = null;
+  if(score >= 25 && strength >= C.minStrength) sig = 'BUY';
+  else if(score <= -25 && strength >= C.minStrength) sig = 'SELL';
 
-  return{score,strength,sig,rsi:Math.round(rsi),mom:mom.toFixed(2)};
+  return {score, strength, sig, rsi: Math.round(rsi), mom: mom.toFixed(3)};
 }
 
-// Risk Shield - Circuit Breakers
+// Risk Shield
 function checkRiskShield(){
-  const equity=S.bal+getUnrealized();
-  const dd=(S.peak-equity)/S.peak*100;
-  const heat=(S.pos.length/C.maxPos)*100;
+  const equity = S.bal + getUnrealized();
+  const dd = (S.peak - equity) / S.peak * 100;
+  const heat = (S.pos.length / C.maxPos) * 100;
 
-  // Reset daily P&L on new day
-  if(new Date().toDateString()!==dayStart){
-    dayStart=new Date().toDateString();
-    dailyPnL=0;
+  if(new Date().toDateString() !== dayStart){
+    dayStart = new Date().toDateString();
+    dailyPnL = 0;
   }
 
-  // Update displays
-  document.getElementById('dd').textContent=dd.toFixed(1)+'%';
-  document.getElementById('heat').textContent=Math.round(heat)+'%';
-  document.getElementById('dailyLoss').textContent='$'+dailyPnL.toFixed(2);
-  document.getElementById('heat').className=heat>70?'r':heat>50?'y':'g';
+  document.getElementById('dd').textContent = dd.toFixed(1) + '%';
+  document.getElementById('heat').textContent = Math.round(heat) + '%';
+  document.getElementById('dailyLoss').textContent = '$' + dailyPnL.toFixed(2);
+  document.getElementById('heat').className = heat > 70 ? 'r' : heat > 50 ? 'y' : 'g';
 
-  // Circuit breakers
-  if(dd>=C.maxDD){
-    document.getElementById('shield').textContent='SHIELD:🛑';
-    document.getElementById('shield').className='badge off';
-    return false; // Stop trading
+  if(dd >= C.maxDD){
+    document.getElementById('shield').textContent = 'SHIELD:🛑';
+    document.getElementById('shield').className = 'badge off';
+    return false;
   }
-  if(Math.abs(dailyPnL)>=C.start*(C.dailyLossLimit/100)&&dailyPnL<0){
-    document.getElementById('shield').textContent='SHIELD:⚠️';
-    document.getElementById('shield').className='badge warn';
+  if(Math.abs(dailyPnL) >= C.start * (C.dailyLossLimit / 100) && dailyPnL < 0){
+    document.getElementById('shield').textContent = 'SHIELD:⚠️';
+    document.getElementById('shield').className = 'badge warn';
     return false;
   }
 
-  document.getElementById('shield').textContent='SHIELD:✓';
-  document.getElementById('shield').className='badge on';
+  document.getElementById('shield').textContent = 'SHIELD:✓';
+  document.getElementById('shield').className = 'badge on';
   return true;
 }
 
-// Dynamic position sizing based on volatility
+// Dynamic lot sizing
 function calcLotSize(sym){
-  const vol=calcVolatility(sym);
-  const p=prices[sym];
-  const equity=S.bal+getUnrealized();
-  const riskPct=1; // Risk 1% per trade
-
-  // Reduce lot size in high volatility
-  const volFactor=p?Math.max(0.5,1-vol/p.mid*100):1;
-
-  // Reduce after losses
-  const streakFactor=S.streak<-2?0.5:1;
-
-  const lot=Math.max(0.01,Math.min(0.05,C.baseLot*volFactor*streakFactor));
-  document.getElementById('lotSize').textContent=lot.toFixed(2);
+  const vol = calcVolatility(sym);
+  const p = prices[sym];
+  const volFactor = p ? Math.max(0.5, 1 - vol / p.mid * 100) : 1;
+  const streakFactor = S.streak < -2 ? 0.5 : 1;
+  const lot = Math.max(0.01, Math.min(0.05, C.baseLot * volFactor * streakFactor));
+  document.getElementById('lotSize').textContent = lot.toFixed(2);
   return lot;
 }
 
-// Get unrealized P&L
 function getUnrealized(){
-  let u=0;
-  S.pos.forEach(pos=>{
-    const p=prices[pos.sym];
-    if(!p)return;
-    const cur=pos.type==='BUY'?p.bid:p.ask;
-    const pips=pos.type==='BUY'?(cur-pos.entry)/pos.pip:(pos.entry-cur)/pos.pip;
-    u+=pips*pos.pipValue;
+  let u = 0;
+  S.pos.forEach(pos => {
+    const p = prices[pos.sym];
+    if(!p) return;
+    const cur = pos.type === 'BUY' ? p.bid : p.ask;
+    const pips = pos.type === 'BUY' ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
+    u += pips * pos.pipValue;
   });
   return u;
 }
 
-// Check correlation before opening
 function hasCorrelatedPosition(sym){
-  const corr=getCorrelatedPairs(sym);
-  return S.pos.some(p=>corr.includes(p.sym)||p.sym===sym);
+  const corr = getCorrelatedPairs(sym);
+  return S.pos.some(p => corr.includes(p.sym) || p.sym === sym);
 }
 
 // Trading Engine
 function trade(){
-  if(!checkRiskShield())return;
+  if(!checkRiskShield()) return;
 
-  const now=Date.now();
+  const now = Date.now();
 
-  SYM.forEach(sym=>{
-    const p=prices[sym.s];
-    if(!p)return;
+  SYM.forEach(sym => {
+    const p = prices[sym.s];
+    if(!p) return;
 
-    // Cooldown
-    if(lastTrade[sym.s]&&now-lastTrade[sym.s]<C.cooldown)return;
+    if(lastTrade[sym.s] && now - lastTrade[sym.s] < C.cooldown) return;
+    if(hasCorrelatedPosition(sym.s)) return;
+    if(S.pos.length >= C.maxPos) return;
 
-    // Already in this or correlated position
-    if(hasCorrelatedPosition(sym.s))return;
-
-    // Max positions
-    if(S.pos.length>=C.maxPos)return;
-
-    const{sig,strength}=getSignal(sym.s);
+    const {sig, strength} = getSignal(sym.s);
 
     if(sig){
-      const lot=calcLotSize(sym.s);
-      const pipValue=lot*10000*sym.p;
+      const lot = calcLotSize(sym.s);
+      // Pip value for forex: 0.01 lot = $0.10 per pip (for most pairs)
+      const pipValue = lot * (sym.s.includes('JPY') ? 100 : 10);
 
-      const isBuy=sig==='BUY';
-      const entry=isBuy?p.ask:p.bid;
+      const isBuy = sig === 'BUY';
+      const entry = isBuy ? p.ask : p.bid;
       const tradeId = generateTradeId();
 
       const newPos = {
         id: tradeId,
-        sym:sym.s,
-        type:sig,
+        sym: sym.s,
+        type: sig,
         entry,
-        tp:isBuy?entry+C.tp*sym.p:entry-C.tp*sym.p,
-        sl:isBuy?entry-C.sl*sym.p:entry+C.sl*sym.p,
-        trail:null,
+        tp: isBuy ? entry + C.tp * sym.p : entry - C.tp * sym.p,
+        sl: isBuy ? entry - C.sl * sym.p : entry + C.sl * sym.p,
+        trail: null,
         pipValue,
-        pip:sym.p,
+        pip: sym.p,
         lot,
         strength,
-        time:now
+        time: now
       };
 
       S.pos.push(newPos);
-
-      // 🔗 SEND WEBHOOK ON OPEN
       sendWebhook('OPEN', newPos);
-
-      lastTrade[sym.s]=now;
-      log(`📈 ${sig} ${sym.s} @${fmtP(sym.s,entry)} [${strength}★]`,isBuy?'g':'r');
+      lastTrade[sym.s] = now;
+      log(`📈 ${sig} ${sym.s} @${fmtP(sym.s, entry)} [${strength}★]`, isBuy ? 'g' : 'r');
       save();
     }
   });
@@ -779,64 +783,59 @@ function trade(){
 }
 
 function managePositions(){
-  const toClose=[];
+  const toClose = [];
 
-  S.pos.forEach((pos,i)=>{
-    const p=prices[pos.sym];
-    if(!p)return;
+  S.pos.forEach((pos, i) => {
+    const p = prices[pos.sym];
+    if(!p) return;
 
-    const isBuy=pos.type==='BUY';
-    const cur=isBuy?p.bid:p.ask;
-    const pips=isBuy?(cur-pos.entry)/pos.pip:(pos.entry-cur)/pos.pip;
+    const isBuy = pos.type === 'BUY';
+    const cur = isBuy ? p.bid : p.ask;
+    const pips = isBuy ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
 
-    // Trailing stop activation
-    if(pips>=C.trail&&!pos.trail){
-      pos.trail=cur;
-      log(`🔒 TRAIL ${pos.sym} +${pips.toFixed(1)}p`,'y');
+    if(pips >= C.trail && !pos.trail){
+      pos.trail = cur;
+      log(`🔒 TRAIL ${pos.sym} +${pips.toFixed(1)}p`, 'y');
     }
 
-    // Update trailing stop
     if(pos.trail){
-      if(isBuy&&cur>pos.trail){
-        pos.trail=cur;
-        pos.sl=cur-C.trail*pos.pip*.4; // Tighter trail
-      }else if(!isBuy&&cur<pos.trail){
-        pos.trail=cur;
-        pos.sl=cur+C.trail*pos.pip*.4;
+      if(isBuy && cur > pos.trail){
+        pos.trail = cur;
+        pos.sl = cur - C.trail * pos.pip * 0.4;
+      } else if(!isBuy && cur < pos.trail){
+        pos.trail = cur;
+        pos.sl = cur + C.trail * pos.pip * 0.4;
       }
     }
 
-    // Exit conditions
-    let reason=null;
+    let reason = null;
     if(isBuy){
-      if(cur>=pos.tp)reason='TP';
-      else if(cur<=pos.sl)reason=pos.trail?'TRAIL':'SL';
-    }else{
-      if(cur<=pos.tp)reason='TP';
-      else if(cur>=pos.sl)reason=pos.trail?'TRAIL':'SL';
+      if(cur >= pos.tp) reason = 'TP';
+      else if(cur <= pos.sl) reason = pos.trail ? 'TRAIL' : 'SL';
+    } else {
+      if(cur <= pos.tp) reason = 'TP';
+      else if(cur >= pos.sl) reason = pos.trail ? 'TRAIL' : 'SL';
     }
 
     if(reason){
-      const pnl=pips*pos.pipValue;
-      S.bal+=pnl;
-      dailyPnL+=pnl;
+      const pnl = pips * pos.pipValue;
+      S.bal += pnl;
+      dailyPnL += pnl;
 
-      // Track returns for Sharpe
-      S.returns.push(pnl/C.start*100);
-      if(S.returns.length>100)S.returns.shift();
+      S.returns.push(pnl / C.start * 100);
+      if(S.returns.length > 100) S.returns.shift();
 
-      if(pnl>0){
-        S.wins++;S.grossWin+=pnl;
-        S.streak=S.streak>0?S.streak+1:1;
-      }else{
-        S.losses++;S.grossLoss+=Math.abs(pnl);
-        S.streak=S.streak<0?S.streak-1:-1;
+      if(pnl > 0){
+        S.wins++; S.grossWin += pnl;
+        S.streak = S.streak > 0 ? S.streak + 1 : 1;
+      } else {
+        S.losses++; S.grossLoss += Math.abs(pnl);
+        S.streak = S.streak < 0 ? S.streak - 1 : -1;
       }
 
-      if(S.bal>S.best)S.best=S.bal;
-      if(S.bal>S.peak)S.peak=S.bal;
+      if(S.bal > S.best) S.best = S.bal;
+      if(S.bal > S.peak) S.peak = S.bal;
 
-      // 🔗 SEND WEBHOOK ON CLOSE
       sendWebhook('CLOSE', {
         ...pos,
         exitPrice: cur,
@@ -846,101 +845,96 @@ function managePositions(){
         pnl: pnl
       });
 
-      const em=reason==='TP'?'✅':reason==='TRAIL'?'🔒':'❌';
-      log(`${em} ${reason} ${pos.sym} ${pnl>=0?'+':''}$${pnl.toFixed(2)}`,(pnl>=0?'g':'r'));
+      const em = reason === 'TP' ? '✅' : reason === 'TRAIL' ? '🔒' : '❌';
+      log(`${em} ${reason} ${pos.sym} ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}`, pnl >= 0 ? 'g' : 'r');
       toClose.push(i);
     }
   });
 
   if(toClose.length){
-    S.pos=S.pos.filter((_,i)=>!toClose.includes(i));
+    S.pos = S.pos.filter((_, i) => !toClose.includes(i));
     save();
   }
 }
 
-// Calculate Sharpe Ratio
 function calcSharpe(){
-  if(S.returns.length<10)return 0;
-  const mean=S.returns.reduce((a,b)=>a+b,0)/S.returns.length;
-  const variance=S.returns.reduce((a,b)=>a+Math.pow(b-mean,2),0)/S.returns.length;
-  const std=Math.sqrt(variance);
-  return std===0?0:(mean/std*Math.sqrt(252)).toFixed(2);
+  if(S.returns.length < 10) return 0;
+  const mean = S.returns.reduce((a, b) => a + b, 0) / S.returns.length;
+  const variance = S.returns.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / S.returns.length;
+  const std = Math.sqrt(variance);
+  return std === 0 ? 0 : (mean / std * Math.sqrt(252)).toFixed(2);
 }
 
-function log(msg,cls){
-  logs.unshift({msg,cls,t:Date.now()});
-  if(logs.length>20)logs.pop();
+function log(msg, cls){
+  logs.unshift({msg, cls, t: Date.now()});
+  if(logs.length > 20) logs.pop();
 }
 
-function fmtP(sym,price){
-  const s=SYM.find(x=>x.s===sym);
-  if(!s)return price.toFixed(4);
-  if(s.p>=0.01)return price.toFixed(2);
-  if(s.p>=0.001)return price.toFixed(3);
-  if(s.p>=0.0001)return price.toFixed(4);
-  if(s.p>=0.00001)return price.toFixed(5);
-  if(s.p>=0.000001)return price.toFixed(6);
-  if(s.p>=0.0000001)return price.toFixed(8);
-  return price.toFixed(10);
+function fmtP(sym, price){
+  const s = SYM.find(x => x.s === sym);
+  if(!s) return price.toFixed(4);
+  if(s.p >= 0.01) return price.toFixed(2);
+  return price.toFixed(5);
 }
 
 function render(){
-  const unr=getUnrealized();
-  const equity=S.bal+unr;
-  const pnl=equity-C.start;
-  const pct=(pnl/C.start)*100;
-  const total=S.wins+S.losses;
-  const wr=total>0?Math.round(S.wins/total*100):0;
-  const pf=S.grossLoss>0?(S.grossWin/S.grossLoss).toFixed(2):'∞';
+  const unr = getUnrealized();
+  const equity = S.bal + unr;
+  const pnl = equity - C.start;
+  const pct = (pnl / C.start) * 100;
+  const total = S.wins + S.losses;
+  const wr = total > 0 ? Math.round(S.wins / total * 100) : 0;
+  const pf = S.grossLoss > 0 ? (S.grossWin / S.grossLoss).toFixed(2) : '∞';
 
-  document.getElementById('equity').textContent='$'+equity.toFixed(2);
-  document.getElementById('equity').className=pnl>=0?'g':'r';
-  document.getElementById('pnl').textContent=(pnl>=0?'+':'')+pnl.toFixed(2);
-  document.getElementById('pnl').className=pnl>=0?'g':'r';
-  document.getElementById('pnlPct').textContent=(pnl>=0?'+':'')+pct.toFixed(2)+'%';
-  document.getElementById('pnlPct').className=pnl>=0?'g':'r';
-  document.getElementById('trades').textContent=total;
-  document.getElementById('winrate').textContent=wr+'%';
-  document.getElementById('winrate').className=wr>=50?'g':wr>=40?'y':'r';
-  document.getElementById('pf').textContent=pf;
-  document.getElementById('openPos').textContent=S.pos.length+'/'+C.maxPos;
-  document.getElementById('streak').textContent=(S.streak>0?'+':'')+S.streak;
-  document.getElementById('streak').className=S.streak>0?'g':S.streak<0?'r':'';
-  document.getElementById('best').textContent='$'+S.best.toFixed(2);
-  document.getElementById('avgWin').textContent='$'+(S.wins>0?(S.grossWin/S.wins).toFixed(2):'0');
-  document.getElementById('avgLoss').textContent='$'+(S.losses>0?(S.grossLoss/S.losses).toFixed(2):'0');
-  document.getElementById('sharpe').textContent=calcSharpe();
-  document.getElementById('time').textContent=new Date().toLocaleTimeString();
-  document.getElementById('status').textContent='🟢 LIVE';
-  document.getElementById('status').className='badge on';
+  document.getElementById('equity').textContent = '$' + equity.toFixed(2);
+  document.getElementById('equity').className = pnl >= 0 ? 'g' : 'r';
+  document.getElementById('pnl').textContent = (pnl >= 0 ? '+' : '') + pnl.toFixed(2);
+  document.getElementById('pnl').className = pnl >= 0 ? 'g' : 'r';
+  document.getElementById('pnlPct').textContent = (pnl >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+  document.getElementById('pnlPct').className = pnl >= 0 ? 'g' : 'r';
+  document.getElementById('trades').textContent = total;
+  document.getElementById('winrate').textContent = wr + '%';
+  document.getElementById('winrate').className = wr >= 50 ? 'g' : wr >= 40 ? 'y' : 'r';
+  document.getElementById('pf').textContent = pf;
+  document.getElementById('openPos').textContent = S.pos.length + '/' + C.maxPos;
+  document.getElementById('streak').textContent = (S.streak > 0 ? '+' : '') + S.streak;
+  document.getElementById('streak').className = S.streak > 0 ? 'g' : S.streak < 0 ? 'r' : '';
+  document.getElementById('best').textContent = '$' + S.best.toFixed(2);
+  document.getElementById('avgWin').textContent = '$' + (S.wins > 0 ? (S.grossWin / S.wins).toFixed(2) : '0');
+  document.getElementById('avgLoss').textContent = '$' + (S.losses > 0 ? (S.grossLoss / S.losses).toFixed(2) : '0');
+  document.getElementById('sharpe').textContent = calcSharpe();
+  document.getElementById('time').textContent = new Date().toLocaleTimeString();
+  document.getElementById('status').textContent = '🟢 LIVE';
+  document.getElementById('status').className = 'badge on';
 
   // Market table
-  document.getElementById('market').innerHTML=SYM.map(sym=>{
-    const p=prices[sym.s];
-    if(!p)return'';
-    const{strength,sig,rsi,mom}=getSignal(sym.s);
-    const pos=S.pos.find(x=>x.sym===sym.s);
+  document.getElementById('market').innerHTML = SYM.map(sym => {
+    const p = prices[sym.s];
+    if(!p) return '';
+    const {strength, sig, rsi, mom} = getSignal(sym.s);
+    const pos = S.pos.find(x => x.sym === sym.s);
 
-    let posH='-';
+    let posH = '-';
     if(pos){
-      const cur=pos.type==='BUY'?p.bid:p.ask;
-      const pips=pos.type==='BUY'?(cur-pos.entry)/pos.pip:(pos.entry-cur)/pos.pip;
-      const pnl=pips*pos.pipValue;
-      posH=`<span class="${pnl>=0?'g':'r'}">${pnl>=0?'+':''}$${pnl.toFixed(2)}</span>`;
+      const cur = pos.type === 'BUY' ? p.bid : p.ask;
+      const pips = pos.type === 'BUY' ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
+      const pnl = pips * pos.pipValue;
+      posH = `<span class="${pnl >= 0 ? 'g' : 'r'}">${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}</span>`;
     }
 
-    let sigH='-';
-    if(sig==='BUY')sigH='<span class="g">▲BUY</span>';
-    else if(sig==='SELL')sigH='<span class="r">▼SELL</span>';
+    let sigH = '-';
+    if(sig === 'BUY') sigH = '<span class="g">▲BUY</span>';
+    else if(sig === 'SELL') sigH = '<span class="r">▼SELL</span>';
 
-    const rsiC=rsi<30?'g':rsi>70?'r':'dim';
-    const momC=mom>0?'g':mom<0?'r':'dim';
+    const rsiC = rsi < 30 ? 'g' : rsi > 70 ? 'r' : 'dim';
+    const momC = parseFloat(mom) > 0 ? 'g' : parseFloat(mom) < 0 ? 'r' : 'dim';
+    const typeC = sym.t === 'major' ? 'b' : sym.t === 'metal' ? 'y' : 'dim';
 
-    return`<tr>
-      <td><b>${sym.s}</b></td>
-      <td>${fmtP(sym.s,p.bid)}</td>
-      <td>${fmtP(sym.s,p.ask)}</td>
-      <td class="${p.change>=0?'g':'r'}">${p.change>=0?'+':''}${p.change.toFixed(1)}</td>
+    return `<tr>
+      <td><b class="${typeC}">${sym.s}</b></td>
+      <td>${fmtP(sym.s, p.bid)}</td>
+      <td>${fmtP(sym.s, p.ask)}</td>
+      <td class="dim">${p.spread.toFixed(1)}</td>
       <td class="${rsiC}">${rsi}</td>
       <td class="${momC}">${mom}</td>
       <td>${sigH}</td>
@@ -949,66 +943,71 @@ function render(){
   }).join('');
 
   // Positions
-  if(S.pos.length===0){
-    document.getElementById('positions').innerHTML='<span class="dim">Scanning...</span>';
-  }else{
-    document.getElementById('positions').innerHTML=S.pos.map(pos=>{
-      const p=prices[pos.sym];
-      if(!p)return'';
-      const cur=pos.type==='BUY'?p.bid:p.ask;
-      const pips=pos.type==='BUY'?(cur-pos.entry)/pos.pip:(pos.entry-cur)/pos.pip;
-      const pnl=pips*pos.pipValue;
-      return`<div class="log" style="border-left:2px solid ${pnl>=0?'var(--g)':'var(--r)'}">
-        ${pos.sym} <span class="${pos.type==='BUY'?'g':'r'}">${pos.type}</span> ${pos.trail?'🔒':''}
-        <span class="${pnl>=0?'g':'r'}">${pips>=0?'+':''}${pips.toFixed(1)}p ($${pnl.toFixed(2)})</span>
+  if(S.pos.length === 0){
+    document.getElementById('positions').innerHTML = '<span class="dim">Scanning markets...</span>';
+  } else {
+    document.getElementById('positions').innerHTML = S.pos.map(pos => {
+      const p = prices[pos.sym];
+      if(!p) return '';
+      const cur = pos.type === 'BUY' ? p.bid : p.ask;
+      const pips = pos.type === 'BUY' ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
+      const pnl = pips * pos.pipValue;
+      return `<div class="log" style="border-left:2px solid ${pnl >= 0 ? 'var(--g)' : 'var(--r)'}">
+        ${pos.sym} <span class="${pos.type === 'BUY' ? 'g' : 'r'}">${pos.type}</span> ${pos.trail ? '🔒' : ''}
+        <span class="${pnl >= 0 ? 'g' : 'r'}">${pips >= 0 ? '+' : ''}${pips.toFixed(1)}p ($${pnl.toFixed(2)})</span>
       </div>`;
     }).join('');
   }
 
   // Log
-  document.getElementById('log').innerHTML=logs.length
-    ?logs.slice(0,12).map(l=>`<div class="log ${l.cls}">${l.msg}</div>`).join('')
-    :'<span class="dim">Starting...</span>';
+  document.getElementById('log').innerHTML = logs.length
+    ? logs.slice(0, 12).map(l => `<div class="log ${l.cls}">${l.msg}</div>`).join('')
+    : '<span class="dim">Starting...</span>';
 
   // Chart
-  S.eq.push(equity);if(S.eq.length>60)S.eq.shift();
-  const min=Math.min(...S.eq)*.98,max=Math.max(...S.eq)*1.02,range=max-min||1;
-  document.getElementById('chart').innerHTML=S.eq.map((v,i)=>{
-    const h=Math.max(4,((v-min)/range)*100);
-    const c=v>=C.start?'var(--g)':'var(--r)';
-    const o=.3+(i/S.eq.length)*.7;
-    return`<div style="height:${h}%;background:${c};opacity:${o}"></div>`;
+  S.eq.push(equity);
+  if(S.eq.length > 60) S.eq.shift();
+  const min = Math.min(...S.eq) * 0.98;
+  const max = Math.max(...S.eq) * 1.02;
+  const range = max - min || 1;
+  document.getElementById('chart').innerHTML = S.eq.map((v, i) => {
+    const h = Math.max(4, ((v - min) / range) * 100);
+    const c = v >= C.start ? 'var(--g)' : 'var(--r)';
+    const o = 0.3 + (i / S.eq.length) * 0.7;
+    return `<div style="height:${h}%;background:${c};opacity:${o}"></div>`;
   }).join('');
 }
 
 // Init
 async function init(){
   loadWebhookConfig();
-  log('🚀 HFT ULTRA 2026 Starting...','b');
-  log('📡 Fetching Binance prices...','b');
+  log('🚀 HFT ULTRA FX 2026 Starting...', 'b');
+  log('📡 Fetching ECB forex rates...', 'b');
 
-  const ok=await fetchBinancePrices();
+  const ok = await fetchECBRates();
   if(ok){
     updatePrices();
     render();
-    log('✅ Ready! 29 crypto pairs loaded','g');
-    log('🛡️ Risk Shield ACTIVE','y');
+    log('✅ Ready! 28 forex pairs loaded', 'g');
+    log('🛡️ Risk Shield ACTIVE', 'y');
     if(webhookConfig.url){
-      log('🔗 MT5 Webhook ENABLED','b');
+      log('🔗 MT5 Webhook ENABLED', 'b');
     }
-  }else{
-    log('❌ Failed to connect to Binance','r');
+  } else {
+    log('❌ Failed to fetch rates', 'r');
   }
 
-  // Main loop - fetch fresh prices every 2 seconds
-  setInterval(async()=>{
-    await fetchBinancePrices();
+  // Refresh ECB rates every 5 minutes
+  setInterval(fetchECBRates, 300000);
+
+  // Main loop - simulate ticks every 1 second
+  setInterval(() => {
     updatePrices();
     trade();
     render();
-  },2000);
+  }, 1000);
 
-  setInterval(save,5000);
+  setInterval(save, 5000);
 }
 
 init();
