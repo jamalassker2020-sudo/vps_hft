@@ -42,6 +42,8 @@ input[type="text"]:focus{outline:none;border-color:var(--b)}
 .modal-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 .profit-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:4px}
 .profit-bar-fill{height:100%;transition:width 0.3s;border-radius:3px}
+.lock-flash{animation:lockFlash 0.5s ease-out}
+@keyframes lockFlash{0%{background:var(--gold);transform:scale(1.05)}100%{background:var(--bg);transform:scale(1)}}
 @media(max-width:600px){.g6{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -49,7 +51,7 @@ input[type="text"]:focus{outline:none;border-color:var(--b)}
 <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
 <div>
 <h1>⚡ HFT ULTRA <span class="y">FX</span> <span class="gold">SMART LOCK</span> <span class="dim">2026</span></h1>
-<small class="dim">28 PAIRS • PROFIT RATCHET • TIERED TRAILS • BREAK-EVEN LOCK</small>
+<small class="dim">28 PAIRS • ACCUMULATING PROFIT LOCK • TIERED TRAILS • BREAK-EVEN LOCK</small>
 </div>
 <div class="row" style="gap:4px">
 <span id="status" class="badge pulse">INIT</span>
@@ -64,7 +66,7 @@ input[type="text"]:focus{outline:none;border-color:var(--b)}
 
 <div class="grid g6" style="margin-bottom:8px">
 <div class="stat"><small>💰 EQUITY</small><b id="equity" class="g">$100.00</b><div id="pnlPct" style="font-size:9px">+0.00%</div></div>
-<div class="stat"><small>🔒 LOCKED</small><b id="locked" class="gold">$0.00</b><div id="lockPct" style="font-size:9px;color:var(--gold)">0%</div></div>
+<div class="stat" id="lockedStat"><small>🔒 LOCKED (∞)</small><b id="locked" class="gold">$0.00</b><div id="lockPct" style="font-size:9px;color:var(--gold)">0 locks</div></div>
 <div class="stat"><small>TRADES</small><b id="trades" class="b">0</b></div>
 <div class="stat"><small>WIN%</small><b id="winrate" class="y">0%</b></div>
 <div class="stat"><small>PROFIT F.</small><b id="pf" class="g">0.00</b></div>
@@ -85,7 +87,7 @@ input[type="text"]:focus{outline:none;border-color:var(--b)}
 <div class="profit-bar"><div id="targetBar" class="profit-bar-fill" style="width:0%;background:var(--g)"></div></div>
 </div>
 <div style="flex:1;margin-left:12px">
-<small class="dim">🛡️ PROFIT LOCK</small>
+<small class="dim">🔒 NEXT LOCK @<span id="nextLockAt">$102</span></small>
 <div class="profit-bar"><div id="lockBar" class="profit-bar-fill" style="width:0%;background:var(--gold)"></div></div>
 </div>
 <div style="flex:1;margin-left:12px">
@@ -123,14 +125,14 @@ input[type="text"]:focus{outline:none;border-color:var(--b)}
 </div>
 <div class="col">
 <div class="card">
-<b>🛡️ SMART PROFIT LOCK</b>
+<b>🛡️ ACCUMULATING PROFIT LOCK</b>
 <div class="grid g3" style="margin-top:6px;font-size:9px;text-align:center">
-<div class="stat"><small>BREAK-EVEN</small><span id="beTrigger" class="g">3p</span></div>
-<div class="stat"><small>TRAIL START</small><span id="trailStart" class="y">5p</span></div>
+<div class="stat"><small>LOCK STEP</small><span id="lockStep" class="gold">$2</span></div>
 <div class="stat"><small>LOCK %</small><span id="lockPctStat" class="gold">50%</span></div>
+<div class="stat"><small>LOCK COUNT</small><span id="lockCount" class="gold">0</span></div>
+<div class="stat"><small>BE TRIGGER</small><span id="beTrigger" class="g">3p</span></div>
+<div class="stat"><small>TRAIL START</small><span id="trailStart" class="y">5p</span></div>
 <div class="stat"><small>LOT</small><span id="lotSize" class="b">0.01</span></div>
-<div class="stat"><small>RR</small><span class="g">3:1</span></div>
-<div class="stat"><small>EXIT SIG</small><span id="exitSig" class="y">ON</span></div>
 </div>
 </div>
 </div>
@@ -231,8 +233,11 @@ const C={
   partial1Trigger:6,   // Close 50% at 6 pips profit
   partial1Pct:0.5,     // Close 50% of position
   
-  // Profit ratchet (equity protection)
-  profitLockPct:50,    // Lock 50% of peak profits
+  // *** ACCUMULATING PROFIT LOCK ***
+  // Every time equity grows by lockStep, we permanently lock lockPct of that step
+  profitLockStep:2,    // Lock profits every $2 gain
+  profitLockPct:50,    // Lock 50% of each step ($1 per $2 gain)
+  
   dailyTarget:3,       // 3% daily target - reduce risk after
   dailyLossLimit:2,    // 2% daily loss limit - stop trading
   
@@ -359,6 +364,7 @@ async function sendWebhook(action, tradeData) {
       balance: S.bal,
       equity: S.bal + getUnrealized(),
       locked_profit: S.lockedProfit || 0,
+      lock_count: S.lockCount || 0,
       open_positions: S.pos.length,
       total_trades: S.wins + S.losses,
       win_rate: S.wins + S.losses > 0 ? (S.wins / (S.wins + S.losses) * 100).toFixed(2) : 0
@@ -457,8 +463,10 @@ function fresh(){
     best:C.start,
     peak:C.start,
     returns:[],
-    lockedProfit:0,      // Locked profit amount
-    sessionPeak:C.start, // Peak equity this session
+    lockedProfit:0,         // Total accumulated locked profit
+    lockCount:0,            // Number of times profit was locked
+    lastLockLevel:C.start,  // Last equity level where we locked profit
+    sessionPeak:C.start,    // Peak equity this session
     dailyStartBal:C.start
   };
 }
@@ -471,6 +479,8 @@ function load(){
     }
     // Ensure new fields exist
     data.lockedProfit = data.lockedProfit || 0;
+    data.lockCount = data.lockCount || 0;
+    data.lastLockLevel = data.lastLockLevel || C.start;
     data.sessionPeak = data.sessionPeak || data.peak || C.start;
     data.dailyStartBal = data.dailyStartBal || C.start;
     return data;
@@ -719,7 +729,7 @@ function getSignal(sym){
 }
 
 // =====================================================
-// SMART PROFIT PROTECTION SYSTEM
+// ACCUMULATING PROFIT LOCK SYSTEM
 // =====================================================
 
 function updateProfitLock(){
@@ -730,10 +740,27 @@ function updateProfitLock(){
     S.sessionPeak = equity;
   }
   
-  // Calculate locked profit (X% of gains above start)
-  const totalGain = S.sessionPeak - C.start;
-  if(totalGain > 0){
-    S.lockedProfit = totalGain * (C.profitLockPct / 100);
+  // *** ACCUMULATING PROFIT LOCK ***
+  // Every time equity reaches a new step level, lock more profit permanently
+  const lockStep = C.profitLockStep;
+  const nextLockLevel = S.lastLockLevel + lockStep;
+  
+  // Check if we've reached a new lock level - this can happen multiple times!
+  while(equity >= S.lastLockLevel + lockStep){
+    // Calculate the amount to lock for this step
+    const lockAmount = lockStep * (C.profitLockPct / 100);
+    
+    // Add to total locked profit (ACCUMULATING - adds each time, never resets!)
+    S.lockedProfit += lockAmount;
+    S.lockCount++;
+    S.lastLockLevel += lockStep;
+    
+    // Visual feedback
+    flashLockStat();
+    
+    log(`🔒 LOCK #${S.lockCount}: +$${lockAmount.toFixed(2)} → TOTAL: $${S.lockedProfit.toFixed(2)}`, 'gold');
+    
+    save();
   }
   
   // Update peak for drawdown calculation
@@ -745,6 +772,13 @@ function updateProfitLock(){
   }
 }
 
+function flashLockStat(){
+  const el = document.getElementById('lockedStat');
+  el.classList.remove('lock-flash');
+  void el.offsetWidth; // Trigger reflow
+  el.classList.add('lock-flash');
+}
+
 function checkTradingMode(){
   const equity = S.bal + getUnrealized();
   const dailyPct = ((equity - S.dailyStartBal) / S.dailyStartBal) * 100;
@@ -754,9 +788,9 @@ function checkTradingMode(){
     dayStart = new Date().toDateString();
     dailyPnL = 0;
     S.dailyStartBal = S.bal;
-    S.sessionPeak = S.bal; // Reset session peak on new day
+    // Note: We do NOT reset locked profit or lastLockLevel - they persist forever!
     tradingMode = 'NORMAL';
-    log('📅 New trading day - mode reset', 'b');
+    log('📅 New trading day - mode reset (locks preserved)', 'b');
   }
   
   // LOCKED mode - daily loss limit hit
@@ -768,14 +802,14 @@ function checkTradingMode(){
     return false;
   }
   
-  // Check if equity dropped below locked profit level
+  // Check if equity dropped below locked profit level (minimum equity floor)
   const minEquity = C.start + S.lockedProfit;
   if(equity < minEquity && S.lockedProfit > 0){
     if(tradingMode !== 'LOCKED'){
       tradingMode = 'LOCKED';
-      log(`🔒 PROFIT LOCK TRIGGERED - Protecting $${S.lockedProfit.toFixed(2)}`, 'gold');
+      log(`🔒 FLOOR TRIGGERED - Protecting $${S.lockedProfit.toFixed(2)} (${S.lockCount} locks)`, 'gold');
       // Close all positions to protect locked profits
-      closeAllPositions('LOCK');
+      closeAllPositions('FLOOR');
     }
     return false;
   }
@@ -939,7 +973,7 @@ function hasCorrelatedPosition(sym){
 // =====================================================
 
 function trade(){
-  // Update profit lock calculations
+  // Update profit lock calculations (this is where accumulation happens!)
   updateProfitLock();
   
   // Check trading mode (may block new trades)
@@ -1172,7 +1206,6 @@ function fmtP(sym, price){
   if(s.p >= 0.01) return price.toFixed(2);
   return price.toFixed(5);
 }
-
 function render(){
   const unr = getUnrealized();
   const equity = S.bal + unr;
@@ -1188,10 +1221,18 @@ function render(){
   document.getElementById('pnlPct').textContent = (pnl >= 0 ? '+' : '') + pct.toFixed(2) + '%';
   document.getElementById('pnlPct').className = pnl >= 0 ? 'g' : 'r';
   
-  // Locked profit display
+  // Locked profit display (accumulating)
   document.getElementById('locked').textContent = '$' + S.lockedProfit.toFixed(2);
-  const lockPct = ((S.lockedProfit / C.start) * 100);
-  document.getElementById('lockPct').textContent = '+' + lockPct.toFixed(1) + '%';
+  document.getElementById('lockPct').textContent = S.lockCount + ' locks';
+  document.getElementById('lockCount').textContent = S.lockCount;
+  
+  // Next lock level
+  const nextLockAt = S.lastLockLevel + C.profitLockStep;
+  document.getElementById('nextLockAt').textContent = '$' + nextLockAt.toFixed(2);
+  
+  // Progress to next lock
+  const progressToNextLock = Math.max(0, Math.min(100, ((equity - S.lastLockLevel) / C.profitLockStep) * 100));
+  document.getElementById('lockBar').style.width = progressToNextLock + '%';
   
   document.getElementById('trades').textContent = total;
   document.getElementById('winrate').textContent = wr + '%';
@@ -1212,9 +1253,6 @@ function render(){
   const targetProgress = Math.min(100, Math.max(0, (dailyPct / C.dailyTarget) * 100));
   document.getElementById('targetBar').style.width = targetProgress + '%';
   document.getElementById('targetBar').style.background = dailyPct >= C.dailyTarget ? 'var(--gold)' : 'var(--g)';
-  
-  const lockProgress = S.lockedProfit > 0 ? Math.min(100, (S.lockedProfit / (S.sessionPeak - C.start)) * 100) : 0;
-  document.getElementById('lockBar').style.width = (S.lockedProfit > 0 ? lockProgress : 0) + '%';
 
   // Market table
   document.getElementById('market').innerHTML = SYM.map(sym => {
@@ -1227,9 +1265,9 @@ function render(){
     if(pos){
       const cur = pos.type === 'BUY' ? p.bid : p.ask;
       const pips = pos.type === 'BUY' ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
-      const pnl = pips * pos.pipValue;
+      const posPnl = pips * pos.pipValue;
       const trailIcon = pos.trailLevel >= 2 ? '📈' : pos.trailLevel === 1 ? '🔒' : '';
-      posH = `<span class="${pnl >= 0 ? 'g' : 'r'}">${trailIcon}${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}</span>`;
+      posH = `<span class="${posPnl >= 0 ? 'g' : 'r'}">${trailIcon}${posPnl >= 0 ? '+' : ''}$${posPnl.toFixed(2)}</span>`;
     }
 
     let sigH = '-';
@@ -1261,12 +1299,12 @@ function render(){
       if(!p) return '';
       const cur = pos.type === 'BUY' ? p.bid : p.ask;
       const pips = pos.type === 'BUY' ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
-      const pnl = pips * pos.pipValue;
+      const posPnl = pips * pos.pipValue;
       const trailIcon = pos.trailLevel >= 2 ? '📈' : pos.trailLevel === 1 ? '🔒' : '';
       const partialIcon = pos.partialClosed ? '💰' : '';
-      return `<div class="log" style="border-left:2px solid ${pnl >= 0 ? 'var(--g)' : 'var(--r)'}">
+      return `<div class="log" style="border-left:2px solid ${posPnl >= 0 ? 'var(--g)' : 'var(--r)'}">
         ${trailIcon}${partialIcon} ${pos.sym} <span class="${pos.type === 'BUY' ? 'g' : 'r'}">${pos.type}</span>
-        <span class="${pnl >= 0 ? 'g' : 'r'}">${pips >= 0 ? '+' : ''}${pips.toFixed(1)}p ($${pnl.toFixed(2)})</span>
+        <span class="${posPnl >= 0 ? 'g' : 'r'}">${pips >= 0 ? '+' : ''}${pips.toFixed(1)}p ($${posPnl.toFixed(2)})</span>
       </div>`;
     }).join('');
   }
@@ -1295,18 +1333,22 @@ async function init(){
   loadWebhookConfig();
   log('🚀 HFT ULTRA FX SMART LOCK 2026 Starting...', 'b');
   log('📡 Fetching ECB forex rates...', 'b');
-  
+
   // Update config displays
   document.getElementById('beTrigger').textContent = C.breakEvenTrigger + 'p';
   document.getElementById('trailStart').textContent = C.trail1Trigger + 'p';
   document.getElementById('lockPctStat').textContent = C.profitLockPct + '%';
+  document.getElementById('lockStep').textContent = '$' + C.profitLockStep;
 
   const ok = await fetchECBRates();
   if(ok){
     updatePrices();
     render();
     log('✅ Ready! 28 forex pairs loaded', 'g');
-    log('🛡️ Smart Profit Lock ACTIVE', 'gold');
+    log(`🔒 Accumulating Profit Lock: $${C.profitLockStep} steps, ${C.profitLockPct}% locked`, 'gold');
+    if(S.lockCount > 0){
+      log(`📊 Restored: ${S.lockCount} locks, $${S.lockedProfit.toFixed(2)} protected`, 'gold');
+    }
     if(webhookConfig.url){
       log('🔗 MT5 Webhook ENABLED', 'b');
     }
