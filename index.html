@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HFT Ultra FX 2026</title>
+<title>HFT Ultra FX 2026 - Smart Profit Lock</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0e14;--card:#121820;--border:#1a2030;--txt:#c8d0dc;--dim:#5a6270;--g:#0f6;--r:#f44;--b:#0af;--y:#fc0}
+:root{--bg:#0a0e14;--card:#121820;--border:#1a2030;--txt:#c8d0dc;--dim:#5a6270;--g:#0f6;--r:#f44;--b:#0af;--y:#fc0;--gold:#ffd700}
 html.light{--bg:#f4f6f8;--card:#fff;--border:#dde;--txt:#1a1a2e;--dim:#888}
 body{background:var(--bg);color:var(--txt);font:11px/1.4 monospace;padding:8px;min-height:100vh}
-.g{color:var(--g)}.r{color:var(--r)}.b{color:var(--b)}.y{color:var(--y)}.dim{color:var(--dim)}
+.g{color:var(--g)}.r{color:var(--r)}.b{color:var(--b)}.y{color:var(--y)}.dim{color:var(--dim)}.gold{color:var(--gold)}
 .card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:8px}
 .row{display:flex;gap:8px;flex-wrap:wrap}
 .col{flex:1;min-width:120px}
@@ -32,7 +32,7 @@ button{background:var(--card);border:1px solid var(--border);color:var(--txt);pa
 button:hover{background:var(--border)}
 .pulse{animation:p 1.5s infinite}@keyframes p{50%{opacity:.5}}
 .badge{display:inline-block;padding:2px 6px;border-radius:3px;font-size:9px}
-.badge.on{background:#0f62;color:var(--g)}.badge.off{background:#f442;color:var(--r)}.badge.warn{background:#fc02;color:var(--y)}
+.badge.on{background:#0f62;color:var(--g)}.badge.off{background:#f442;color:var(--r)}.badge.warn{background:#fc02;color:var(--y)}.badge.gold{background:#ffd7002a;color:var(--gold)}
 input[type="text"]{background:var(--bg);border:1px solid var(--border);color:var(--txt);padding:4px 8px;border-radius:3px;font:inherit;width:100%;font-size:16px}
 input[type="text"]:focus{outline:none;border-color:var(--b)}
 .webhook-status{font-size:9px;margin-top:4px}
@@ -40,17 +40,20 @@ input[type="text"]:focus{outline:none;border-color:var(--b)}
 .modal{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;max-width:400px;width:90%}
 .modal h3{margin-bottom:12px;font-size:14px}
 .modal-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.profit-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:4px}
+.profit-bar-fill{height:100%;transition:width 0.3s;border-radius:3px}
 @media(max-width:600px){.g6{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
 <div>
-<h1>⚡ HFT ULTRA <span class="y">FX</span> <span class="dim">2026</span></h1>
-<small class="dim">28 FOREX PAIRS • ECB + SIMULATED TICKS • SMART RISK • MT5 WEBHOOK</small>
+<h1>⚡ HFT ULTRA <span class="y">FX</span> <span class="gold">SMART LOCK</span> <span class="dim">2026</span></h1>
+<small class="dim">28 PAIRS • PROFIT RATCHET • TIERED TRAILS • BREAK-EVEN LOCK</small>
 </div>
 <div class="row" style="gap:4px">
 <span id="status" class="badge pulse">INIT</span>
+<span id="mode" class="badge">MODE:--</span>
 <span id="api" class="badge dim">API:--</span>
 <span id="webhook" class="badge dim">WH:--</span>
 <span id="shield" class="badge">SHIELD:--</span>
@@ -61,17 +64,35 @@ input[type="text"]:focus{outline:none;border-color:var(--b)}
 
 <div class="grid g6" style="margin-bottom:8px">
 <div class="stat"><small>💰 EQUITY</small><b id="equity" class="g">$100.00</b><div id="pnlPct" style="font-size:9px">+0.00%</div></div>
-<div class="stat"><small>P&L</small><b id="pnl">$0.00</b></div>
+<div class="stat"><small>🔒 LOCKED</small><b id="locked" class="gold">$0.00</b><div id="lockPct" style="font-size:9px;color:var(--gold)">0%</div></div>
 <div class="stat"><small>TRADES</small><b id="trades" class="b">0</b></div>
 <div class="stat"><small>WIN%</small><b id="winrate" class="y">0%</b></div>
 <div class="stat"><small>PROFIT F.</small><b id="pf" class="g">0.00</b></div>
 <div class="stat"><small>OPEN</small><b id="openPos" class="b">0/6</b></div>
 <div class="stat"><small>STREAK</small><b id="streak">0</b></div>
-<div class="stat"><small>BEST</small><b id="best" class="g">$100</b></div>
+<div class="stat"><small>PEAK</small><b id="best" class="g">$100</b></div>
 <div class="stat"><small>DD</small><b id="dd" class="r">0%</b></div>
+<div class="stat"><small>TODAY</small><b id="todayPnl" class="g">$0</b></div>
 <div class="stat"><small>AVG WIN</small><b id="avgWin" class="g">$0</b></div>
-<div class="stat"><small>AVG LOSS</small><b id="avgLoss" class="r">$0</b></div>
 <div class="stat"><small>SHARPE</small><b id="sharpe" class="b">0.00</b></div>
+</div>
+
+<!-- Profit Protection Status -->
+<div class="card" style="padding:6px">
+<div class="row" style="justify-content:space-between;align-items:center">
+<div style="flex:1">
+<small class="dim">🎯 DAILY TARGET</small>
+<div class="profit-bar"><div id="targetBar" class="profit-bar-fill" style="width:0%;background:var(--g)"></div></div>
+</div>
+<div style="flex:1;margin-left:12px">
+<small class="dim">🛡️ PROFIT LOCK</small>
+<div class="profit-bar"><div id="lockBar" class="profit-bar-fill" style="width:0%;background:var(--gold)"></div></div>
+</div>
+<div style="flex:1;margin-left:12px">
+<small class="dim">🔥 RISK HEAT</small>
+<div class="profit-bar"><div id="heatBar" class="profit-bar-fill" style="width:0%;background:var(--r)"></div></div>
+</div>
+</div>
 </div>
 
 <div class="row">
@@ -102,14 +123,14 @@ input[type="text"]:focus{outline:none;border-color:var(--b)}
 </div>
 <div class="col">
 <div class="card">
-<b>🛡️ RISK SHIELD</b>
+<b>🛡️ SMART PROFIT LOCK</b>
 <div class="grid g3" style="margin-top:6px;font-size:9px;text-align:center">
-<div class="stat"><small>MAX DD</small><span id="maxDD">5%</span></div>
-<div class="stat"><small>DAILY LOSS</small><span id="dailyLoss">$0</span></div>
-<div class="stat"><small>HEAT</small><span id="heat">0%</span></div>
+<div class="stat"><small>BREAK-EVEN</small><span id="beTrigger" class="g">3p</span></div>
+<div class="stat"><small>TRAIL START</small><span id="trailStart" class="y">5p</span></div>
+<div class="stat"><small>LOCK %</small><span id="lockPctStat" class="gold">50%</span></div>
 <div class="stat"><small>LOT</small><span id="lotSize" class="b">0.01</span></div>
 <div class="stat"><small>RR</small><span class="g">3:1</span></div>
-<div class="stat"><small>CORR HEDGE</small><span id="hedge" class="y">ON</span></div>
+<div class="stat"><small>EXIT SIG</small><span id="exitSig" class="y">ON</span></div>
 </div>
 </div>
 </div>
@@ -153,7 +174,6 @@ matchMedia('(prefers-color-scheme:light)').onchange=e=>document.documentElement.
 // FOREX INSTRUMENTS (28 pairs)
 // =====================================================
 const SYM=[
-  // Major Pairs
   {s:'EUR/USD',base:'EUR',quote:'USD',p:0.0001,t:'major',mt5:'EURUSD',spread:1.2},
   {s:'GBP/USD',base:'GBP',quote:'USD',p:0.0001,t:'major',mt5:'GBPUSD',spread:1.5},
   {s:'USD/JPY',base:'USD',quote:'JPY',p:0.01,t:'major',mt5:'USDJPY',spread:1.3},
@@ -161,23 +181,17 @@ const SYM=[
   {s:'AUD/USD',base:'AUD',quote:'USD',p:0.0001,t:'major',mt5:'AUDUSD',spread:1.4},
   {s:'USD/CAD',base:'USD',quote:'CAD',p:0.0001,t:'major',mt5:'USDCAD',spread:1.6},
   {s:'NZD/USD',base:'NZD',quote:'USD',p:0.0001,t:'major',mt5:'NZDUSD',spread:1.8},
-  
-  // Euro Crosses
   {s:'EUR/GBP',base:'EUR',quote:'GBP',p:0.0001,t:'cross',mt5:'EURGBP',spread:1.5},
   {s:'EUR/JPY',base:'EUR',quote:'JPY',p:0.01,t:'cross',mt5:'EURJPY',spread:1.8},
   {s:'EUR/CHF',base:'EUR',quote:'CHF',p:0.0001,t:'cross',mt5:'EURCHF',spread:2.0},
   {s:'EUR/AUD',base:'EUR',quote:'AUD',p:0.0001,t:'cross',mt5:'EURAUD',spread:2.5},
   {s:'EUR/CAD',base:'EUR',quote:'CAD',p:0.0001,t:'cross',mt5:'EURCAD',spread:2.2},
   {s:'EUR/NZD',base:'EUR',quote:'NZD',p:0.0001,t:'cross',mt5:'EURNZD',spread:3.0},
-  
-  // GBP Crosses
   {s:'GBP/JPY',base:'GBP',quote:'JPY',p:0.01,t:'cross',mt5:'GBPJPY',spread:2.5},
   {s:'GBP/CHF',base:'GBP',quote:'CHF',p:0.0001,t:'cross',mt5:'GBPCHF',spread:2.8},
   {s:'GBP/AUD',base:'GBP',quote:'AUD',p:0.0001,t:'cross',mt5:'GBPAUD',spread:3.0},
   {s:'GBP/CAD',base:'GBP',quote:'CAD',p:0.0001,t:'cross',mt5:'GBPCAD',spread:2.8},
   {s:'GBP/NZD',base:'GBP',quote:'NZD',p:0.0001,t:'cross',mt5:'GBPNZD',spread:3.5},
-  
-  // Other Crosses
   {s:'AUD/JPY',base:'AUD',quote:'JPY',p:0.01,t:'cross',mt5:'AUDJPY',spread:2.0},
   {s:'AUD/NZD',base:'AUD',quote:'NZD',p:0.0001,t:'cross',mt5:'AUDNZD',spread:2.5},
   {s:'AUD/CAD',base:'AUD',quote:'CAD',p:0.0001,t:'cross',mt5:'AUDCAD',spread:2.2},
@@ -187,28 +201,58 @@ const SYM=[
   {s:'NZD/CHF',base:'NZD',quote:'CHF',p:0.0001,t:'cross',mt5:'NZDCHF',spread:3.0},
   {s:'CAD/JPY',base:'CAD',quote:'JPY',p:0.01,t:'cross',mt5:'CADJPY',spread:2.2},
   {s:'CAD/CHF',base:'CAD',quote:'CHF',p:0.0001,t:'cross',mt5:'CADCHF',spread:2.5},
-  
-  // Gold
   {s:'XAU/USD',base:'XAU',quote:'USD',p:0.01,t:'metal',mt5:'XAUUSD',spread:25}
 ];
 
-// Enhanced Config - Conservative Forex HFT
+// =====================================================
+// SMART PROFIT LOCK CONFIGURATION
+// =====================================================
 const C={
   start:100,
   baseLot:0.01,
-  tp:15,           // 15 pip TP (3:1 RR)
-  sl:5,            // 5 pip SL tight
-  trail:6,         // Trail after 6 pips
-  maxPos:6,        // Max 6 positions
-  maxDD:5,         // 5% max drawdown circuit breaker
-  dailyLossLimit:3,// 3% daily loss limit
-  cooldown:5000,   // 5s cooldown for forex
+  
+  // *** PROFIT PROTECTION SETTINGS ***
+  tp:15,               // 15 pip TP (3:1 RR)
+  sl:5,                // 5 pip SL tight
+  
+  // Break-even system
+  breakEvenTrigger:3,  // Move SL to break-even after 3 pips profit
+  breakEvenPlus:0.5,   // Add 0.5 pip above entry when at break-even
+  
+  // Tiered trailing stop system
+  trail1Trigger:5,     // Start trailing at 5 pips
+  trail1Distance:2,    // Trail 2 pips behind
+  trail2Trigger:8,     // Tighter trail at 8 pips  
+  trail2Distance:1.5,  // Trail 1.5 pips behind
+  trail3Trigger:12,    // Very tight at 12 pips
+  trail3Distance:1,    // Trail 1 pip behind
+  
+  // Partial profit taking
+  partial1Trigger:6,   // Close 50% at 6 pips profit
+  partial1Pct:0.5,     // Close 50% of position
+  
+  // Profit ratchet (equity protection)
+  profitLockPct:50,    // Lock 50% of peak profits
+  dailyTarget:3,       // 3% daily target - reduce risk after
+  dailyLossLimit:2,    // 2% daily loss limit - stop trading
+  
+  // Time-based exits
+  maxHoldTime:300000,  // 5 min max hold - close if stagnant
+  stagnantThreshold:2, // If less than 2 pips in 3 mins, consider exit
+  
+  // Momentum exit signals
+  momentumExitThreshold:0.03, // Exit if momentum reverses strongly
+  rsiExitBuffer:10,    // Exit if RSI moves 10 points against position
+  
+  // Risk settings
+  maxPos:6,
+  maxDD:5,
+  cooldown:5000,
   rsiPeriod:14,
-  minRSI:25,       // Oversold
-  maxRSI:75,       // Overbought
-  minStrength:3,   // Need 3+ strategy confirmations
-  spreadMax:3,     // Max 3 pip spread to enter
-  corrThreshold:0.7
+  minRSI:25,
+  maxRSI:75,
+  minStrength:3,
+  spreadMax:3
 };
 
 // =====================================================
@@ -278,9 +322,7 @@ function generateTradeId() {
   return 'HFT-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
-// =====================================================
-// WEBHOOK SENDER - MT5 INTEGRATION
-// =====================================================
+// Webhook sender
 async function sendWebhook(action, tradeData) {
   if (!webhookConfig.url) return;
   if (action === 'OPEN' && !webhookConfig.openEnabled) return;
@@ -290,8 +332,8 @@ async function sendWebhook(action, tradeData) {
   
   const payload = {
     action: action,
-    source: "HFT-ULTRA-FX-2026",
-    version: "1.0",
+    source: "HFT-ULTRA-FX-SMARTLOCK-2026",
+    version: "2.0",
     timestamp: new Date().toISOString(),
     timestamp_unix: Date.now(),
     trade_id: tradeData.id || generateTradeId(),
@@ -316,6 +358,7 @@ async function sendWebhook(action, tradeData) {
     account: {
       balance: S.bal,
       equity: S.bal + getUnrealized(),
+      locked_profit: S.lockedProfit || 0,
       open_positions: S.pos.length,
       total_trades: S.wins + S.losses,
       win_rate: S.wins + S.losses > 0 ? (S.wins / (S.wins + S.losses) * 100).toFixed(2) : 0
@@ -331,7 +374,7 @@ async function sendWebhook(action, tradeData) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Signal-Source': 'HFT-ULTRA-FX-2026',
+        'X-Signal-Source': 'HFT-ULTRA-FX-SMARTLOCK-2026',
         'X-Signal-Action': action,
         ...(webhookConfig.secret && { 'X-Auth-Key': webhookConfig.secret })
       },
@@ -372,15 +415,15 @@ async function testWebhook() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Signal-Source': 'HFT-ULTRA-FX-2026',
+        'X-Signal-Source': 'HFT-ULTRA-FX-SMARTLOCK-2026',
         'X-Signal-Action': 'TEST'
       },
       body: JSON.stringify({
         action: 'TEST',
-        source: 'HFT-ULTRA-FX-2026',
-        version: '1.0',
+        source: 'HFT-ULTRA-FX-SMARTLOCK-2026',
+        version: '2.0',
         timestamp: new Date().toISOString(),
-        message: 'Connection test from HFT Ultra FX 2026'
+        message: 'Connection test from HFT Ultra FX Smart Lock 2026'
       }),
       mode: 'cors'
     });
@@ -399,8 +442,26 @@ async function testWebhook() {
 let S=load()||fresh();
 let prices={},history={},lastTrade={},logs=[],ticks=0,dailyPnL=0,dayStart=new Date().toDateString();
 let ecbRates={};
+let tradingMode = 'NORMAL'; // NORMAL, DEFENSIVE, LOCKED
 
-function fresh(){return{bal:C.start,pos:[],wins:0,losses:0,grossWin:0,grossLoss:0,eq:[C.start],streak:0,best:C.start,peak:C.start,returns:[]}}
+function fresh(){
+  return {
+    bal:C.start,
+    pos:[],
+    wins:0,
+    losses:0,
+    grossWin:0,
+    grossLoss:0,
+    eq:[C.start],
+    streak:0,
+    best:C.start,
+    peak:C.start,
+    returns:[],
+    lockedProfit:0,      // Locked profit amount
+    sessionPeak:C.start, // Peak equity this session
+    dailyStartBal:C.start
+  };
+}
 
 function load(){
   try{
@@ -408,6 +469,10 @@ function load(){
     if (data.webhook) {
       webhookConfig = { ...webhookConfig, ...data.webhook };
     }
+    // Ensure new fields exist
+    data.lockedProfit = data.lockedProfit || 0;
+    data.sessionPeak = data.sessionPeak || data.peak || C.start;
+    data.dailyStartBal = data.dailyStartBal || C.start;
     return data;
   } catch(e) {
     return null;
@@ -431,33 +496,38 @@ function save(){
   } catch(e) {}
 }
 
-function reset(){S=fresh();logs=[];prices={};history={};dailyPnL=0;ecbRates={};save();render()}
+function reset(){
+  S=fresh();
+  logs=[];
+  prices={};
+  history={};
+  dailyPnL=0;
+  ecbRates={};
+  tradingMode='NORMAL';
+  save();
+  render();
+}
 
 // =====================================================
 // FOREX PRICE DATA - ECB + Simulated Ticks
 // =====================================================
 
-// Fetch ECB rates via Frankfurter API (free, CORS enabled)
 async function fetchECBRates(){
   try{
-    // Fetch latest rates from ECB via Frankfurter
     const r = await fetch('https://api.frankfurter.app/latest?from=USD');
     const data = await r.json();
     
-    // Store rates (all vs USD)
     ecbRates = {
       'USD': 1,
-      'EUR': 1 / data.rates.EUR, // EUR/USD
-      'GBP': 1 / data.rates.GBP, // GBP/USD
-      'JPY': data.rates.JPY,     // USD/JPY
-      'CHF': data.rates.CHF,     // USD/CHF
-      'AUD': 1 / data.rates.AUD, // AUD/USD
-      'CAD': data.rates.CAD,     // USD/CAD
-      'NZD': 1 / data.rates.NZD, // NZD/USD
+      'EUR': 1 / data.rates.EUR,
+      'GBP': 1 / data.rates.GBP,
+      'JPY': data.rates.JPY,
+      'CHF': data.rates.CHF,
+      'AUD': 1 / data.rates.AUD,
+      'CAD': data.rates.CAD,
+      'NZD': 1 / data.rates.NZD,
     };
     
-    // Also fetch XAU (gold) - use approximate market rate
-    // ECB doesn't provide gold, so we'll simulate around ~2650
     ecbRates['XAU'] = 2650 + (Math.random() - 0.5) * 20;
     
     document.getElementById('api').textContent='API:ECB✓';
@@ -465,7 +535,6 @@ async function fetchECBRates(){
     return true;
   }catch(e){
     console.log('ECB API error:', JSON.stringify(e));
-    // Use fallback rates if API fails
     ecbRates = {
       'USD': 1,
       'EUR': 1.0850,
@@ -483,18 +552,15 @@ async function fetchECBRates(){
   }
 }
 
-// Calculate cross rate from base rates
 function getCrossRate(base, quote) {
   if (base === 'USD') {
     return ecbRates[quote] || 1;
   } else if (quote === 'USD') {
     return ecbRates[base] || 1;
   } else {
-    // Cross rate: BASE/QUOTE = (BASE/USD) / (QUOTE/USD)
     const baseUSD = ecbRates[base] || 1;
     const quoteUSD = ecbRates[quote] || 1;
     
-    // Handle JPY pairs
     if (quote === 'JPY') {
       return baseUSD * ecbRates['JPY'];
     }
@@ -506,35 +572,24 @@ function getCrossRate(base, quote) {
   }
 }
 
-// Simulate realistic forex tick movement
 function simulateTick(sym, basePrice) {
   const pip = sym.p;
   const volatility = sym.t === 'metal' ? 0.5 : (sym.t === 'major' ? 0.3 : 0.4);
-  
-  // Random walk with slight mean reversion
   const change = (Math.random() - 0.5) * volatility * pip * 10;
-  
   return basePrice + change;
 }
 
-// Update prices with simulated ticks
 function updatePrices(){
   SYM.forEach(sym => {
-    // Calculate base mid price from ECB rates
     let baseMid = getCrossRate(sym.base, sym.quote);
-    
-    // Add simulated tick movement
     const prevMid = prices[sym.s]?.mid || baseMid;
     const newMid = simulateTick(sym, prevMid);
-    
-    // Mean reversion toward ECB rate
     const reversion = (baseMid - newMid) * 0.01;
     const mid = newMid + reversion;
     
     updateHistory(sym.s, mid);
     
-    // Calculate bid/ask with spread
-    const spreadPips = sym.spread * (0.8 + Math.random() * 0.4); // Variable spread
+    const spreadPips = sym.spread * (0.8 + Math.random() * 0.4);
     const halfSpread = (spreadPips * sym.p) / 2;
     
     const bid = mid - halfSpread;
@@ -542,10 +597,10 @@ function updatePrices(){
     const change = prices[sym.s] ? (mid - prices[sym.s].mid) / sym.p : 0;
     
     prices[sym.s] = {
-      bid: bid,
-      ask: ask,
-      mid: mid,
-      change: change,
+      bid,
+      ask,
+      mid,
+      change,
       spread: spreadPips,
       pip: sym.p,
       type: sym.t
@@ -554,14 +609,12 @@ function updatePrices(){
   ticks++;
 }
 
-// Price history for indicators
 function updateHistory(sym, price){
   if(!history[sym]) history[sym] = [];
   history[sym].push(price);
   if(history[sym].length > 50) history[sym].shift();
 }
 
-// RSI Calculation
 function calcRSI(sym){
   const h = history[sym];
   if(!h || h.length < C.rsiPeriod + 1) return 50;
@@ -576,14 +629,12 @@ function calcRSI(sym){
   return 100 - (100 / (1 + rs));
 }
 
-// Momentum (Rate of Change)
 function calcMomentum(sym){
   const h = history[sym];
   if(!h || h.length < 10) return 0;
   return ((h[h.length-1] - h[h.length-10]) / h[h.length-10]) * 100;
 }
 
-// Volatility
 function calcVolatility(sym){
   const h = history[sym];
   if(!h || h.length < 10) return 1;
@@ -594,7 +645,6 @@ function calcVolatility(sym){
   return sum / 9;
 }
 
-// Forex correlation pairs
 function getCorrelatedPairs(sym){
   const corr = {
     'EUR/USD': ['GBP/USD', 'EUR/GBP'],
@@ -606,12 +656,12 @@ function getCorrelatedPairs(sym){
     'NZD/USD': ['AUD/USD', 'AUD/NZD'],
     'USD/CHF': ['EUR/CHF', 'EUR/USD'],
     'USD/CAD': ['AUD/CAD', 'EUR/CAD'],
-    'XAU/USD': ['EUR/USD'] // Gold correlates with EUR
+    'XAU/USD': ['EUR/USD']
   };
   return corr[sym] || [];
 }
 
-// Enhanced AI Signal Generation for Forex
+// Enhanced AI Signal Generation
 function getSignal(sym){
   const p = prices[sym];
   if(!p) return {score: 0, strength: 0, sig: null, rsi: 50, mom: 0};
@@ -622,17 +672,14 @@ function getSignal(sym){
 
   let score = 0, strength = 0;
 
-  // 1. RSI Strategy
   if(rsi < C.minRSI) { score += 20; strength++; }
   else if(rsi > C.maxRSI) { score -= 20; strength++; }
   else if(rsi < 40) { score += 10; }
   else if(rsi > 60) { score -= 10; }
 
-  // 2. Momentum Confirmation
   if(mom > 0.02 && rsi < 50) { score += 15; strength++; }
   else if(mom < -0.02 && rsi > 50) { score -= 15; strength++; }
 
-  // 3. Trend Following (MA)
   const h = history[sym];
   if(h && h.length >= 20){
     const ma20 = h.slice(-20).reduce((a,b) => a + b, 0) / 20;
@@ -640,19 +687,16 @@ function getSignal(sym){
     else if(p.mid < ma20 && mom < 0) { score -= 12; strength++; }
   }
 
-  // 4. Volatility Filter
   if(vol < p.mid * 0.0005) { strength++; }
 
-  // 5. USD strength check (for USD pairs)
   if(sym.includes('USD')){
     const eurusd = prices['EUR/USD'];
     if(eurusd){
-      if(sym.startsWith('USD') && eurusd.change < 0) { strength++; } // USD strong
-      else if(sym.endsWith('USD') && eurusd.change > 0) { strength++; } // USD weak
+      if(sym.startsWith('USD') && eurusd.change < 0) { strength++; }
+      else if(sym.endsWith('USD') && eurusd.change > 0) { strength++; }
     }
   }
 
-  // 6. Cross-pair confirmation
   const corr = getCorrelatedPairs(sym);
   corr.forEach(c => {
     const cp = prices[c];
@@ -661,40 +705,198 @@ function getSignal(sym){
     }
   });
 
-  // Spread filter
   if(p.spread > C.spreadMax) return {score, strength: 0, sig: null, rsi: Math.round(rsi), mom: mom.toFixed(3)};
 
   let sig = null;
-  if(score >= 25 && strength >= C.minStrength) sig = 'BUY';
-  else if(score <= -25 && strength >= C.minStrength) sig = 'SELL';
+  // In defensive mode, require higher strength
+  const reqStrength = tradingMode === 'DEFENSIVE' ? C.minStrength + 1 : C.minStrength;
+  const reqScore = tradingMode === 'DEFENSIVE' ? 30 : 25;
+  
+  if(score >= reqScore && strength >= reqStrength) sig = 'BUY';
+  else if(score <= -reqScore && strength >= reqStrength) sig = 'SELL';
 
   return {score, strength, sig, rsi: Math.round(rsi), mom: mom.toFixed(3)};
 }
 
-// Risk Shield
+// =====================================================
+// SMART PROFIT PROTECTION SYSTEM
+// =====================================================
+
+function updateProfitLock(){
+  const equity = S.bal + getUnrealized();
+  
+  // Update session peak
+  if(equity > S.sessionPeak){
+    S.sessionPeak = equity;
+  }
+  
+  // Calculate locked profit (X% of gains above start)
+  const totalGain = S.sessionPeak - C.start;
+  if(totalGain > 0){
+    S.lockedProfit = totalGain * (C.profitLockPct / 100);
+  }
+  
+  // Update peak for drawdown calculation
+  if(S.bal > S.peak){
+    S.peak = S.bal;
+  }
+  if(S.bal > S.best){
+    S.best = S.bal;
+  }
+}
+
+function checkTradingMode(){
+  const equity = S.bal + getUnrealized();
+  const dailyPct = ((equity - S.dailyStartBal) / S.dailyStartBal) * 100;
+  
+  // Check for new day
+  if(new Date().toDateString() !== dayStart){
+    dayStart = new Date().toDateString();
+    dailyPnL = 0;
+    S.dailyStartBal = S.bal;
+    S.sessionPeak = S.bal; // Reset session peak on new day
+    tradingMode = 'NORMAL';
+    log('📅 New trading day - mode reset', 'b');
+  }
+  
+  // LOCKED mode - daily loss limit hit
+  if(dailyPct <= -C.dailyLossLimit){
+    if(tradingMode !== 'LOCKED'){
+      tradingMode = 'LOCKED';
+      log('🔒 LOCKED MODE - Daily loss limit reached', 'r');
+    }
+    return false;
+  }
+  
+  // Check if equity dropped below locked profit level
+  const minEquity = C.start + S.lockedProfit;
+  if(equity < minEquity && S.lockedProfit > 0){
+    if(tradingMode !== 'LOCKED'){
+      tradingMode = 'LOCKED';
+      log(`🔒 PROFIT LOCK TRIGGERED - Protecting $${S.lockedProfit.toFixed(2)}`, 'gold');
+      // Close all positions to protect locked profits
+      closeAllPositions('LOCK');
+    }
+    return false;
+  }
+  
+  // DEFENSIVE mode - hit daily target
+  if(dailyPct >= C.dailyTarget){
+    if(tradingMode === 'NORMAL'){
+      tradingMode = 'DEFENSIVE';
+      log(`🛡️ DEFENSIVE MODE - ${C.dailyTarget}% target reached!`, 'gold');
+    }
+  }
+  
+  // Update mode display
+  const modeEl = document.getElementById('mode');
+  if(tradingMode === 'LOCKED'){
+    modeEl.textContent = 'MODE:🔒';
+    modeEl.className = 'badge off';
+  } else if(tradingMode === 'DEFENSIVE'){
+    modeEl.textContent = 'MODE:🛡️';
+    modeEl.className = 'badge gold';
+  } else {
+    modeEl.textContent = 'MODE:⚡';
+    modeEl.className = 'badge on';
+  }
+  
+  return tradingMode !== 'LOCKED';
+}
+
+function closeAllPositions(reason){
+  S.pos.forEach(pos => {
+    const p = prices[pos.sym];
+    if(!p) return;
+    
+    const isBuy = pos.type === 'BUY';
+    const cur = isBuy ? p.bid : p.ask;
+    const pips = isBuy ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
+    const pnl = pips * pos.pipValue;
+    
+    S.bal += pnl;
+    dailyPnL += pnl;
+    
+    S.returns.push(pnl / C.start * 100);
+    if(S.returns.length > 100) S.returns.shift();
+    
+    if(pnl > 0){
+      S.wins++; S.grossWin += pnl;
+    } else {
+      S.losses++; S.grossLoss += Math.abs(pnl);
+    }
+    
+    sendWebhook('CLOSE', {
+      ...pos,
+      exitPrice: cur,
+      currentPrice: cur,
+      reason: reason,
+      pips: pips,
+      pnl: pnl
+    });
+    
+    log(`🔒 ${reason} ${pos.sym} ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}`, pnl >= 0 ? 'g' : 'r');
+  });
+  
+  S.pos = [];
+  save();
+}
+
+// Check for momentum reversal exit signal
+function checkMomentumExit(pos){
+  const mom = calcMomentum(pos.sym);
+  const rsi = calcRSI(pos.sym);
+  
+  // For BUY positions, exit if momentum turns strongly negative
+  if(pos.type === 'BUY'){
+    if(mom < -C.momentumExitThreshold) return 'MOM_REV';
+    if(pos.entryRSI && rsi < pos.entryRSI - C.rsiExitBuffer) return 'RSI_REV';
+  } else {
+    // For SELL positions, exit if momentum turns strongly positive
+    if(mom > C.momentumExitThreshold) return 'MOM_REV';
+    if(pos.entryRSI && rsi > pos.entryRSI + C.rsiExitBuffer) return 'RSI_REV';
+  }
+  
+  return null;
+}
+
+// Check for time-based exit
+function checkTimeExit(pos){
+  const holdTime = Date.now() - pos.time;
+  
+  if(holdTime > C.maxHoldTime){
+    const p = prices[pos.sym];
+    if(!p) return null;
+    
+    const isBuy = pos.type === 'BUY';
+    const cur = isBuy ? p.bid : p.ask;
+    const pips = isBuy ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
+    
+    // If position is barely moving after max hold time, close it
+    if(Math.abs(pips) < C.stagnantThreshold){
+      return 'TIME';
+    }
+  }
+  
+  return null;
+}
+
+// Risk Shield check
 function checkRiskShield(){
   const equity = S.bal + getUnrealized();
   const dd = (S.peak - equity) / S.peak * 100;
   const heat = (S.pos.length / C.maxPos) * 100;
 
-  if(new Date().toDateString() !== dayStart){
-    dayStart = new Date().toDateString();
-    dailyPnL = 0;
-  }
-
   document.getElementById('dd').textContent = dd.toFixed(1) + '%';
-  document.getElementById('heat').textContent = Math.round(heat) + '%';
-  document.getElementById('dailyLoss').textContent = '$' + dailyPnL.toFixed(2);
-  document.getElementById('heat').className = heat > 70 ? 'r' : heat > 50 ? 'y' : 'g';
+  document.getElementById('heatBar').style.width = heat + '%';
+  
+  // Daily P&L
+  document.getElementById('todayPnl').textContent = (dailyPnL >= 0 ? '+$' : '-$') + Math.abs(dailyPnL).toFixed(2);
+  document.getElementById('todayPnl').className = dailyPnL >= 0 ? 'g' : 'r';
 
   if(dd >= C.maxDD){
     document.getElementById('shield').textContent = 'SHIELD:🛑';
     document.getElementById('shield').className = 'badge off';
-    return false;
-  }
-  if(Math.abs(dailyPnL) >= C.start * (C.dailyLossLimit / 100) && dailyPnL < 0){
-    document.getElementById('shield').textContent = 'SHIELD:⚠️';
-    document.getElementById('shield').className = 'badge warn';
     return false;
   }
 
@@ -703,13 +905,14 @@ function checkRiskShield(){
   return true;
 }
 
-// Dynamic lot sizing
 function calcLotSize(sym){
   const vol = calcVolatility(sym);
   const p = prices[sym];
   const volFactor = p ? Math.max(0.5, 1 - vol / p.mid * 100) : 1;
   const streakFactor = S.streak < -2 ? 0.5 : 1;
-  const lot = Math.max(0.01, Math.min(0.05, C.baseLot * volFactor * streakFactor));
+  // In defensive mode, use smaller lots
+  const modeFactor = tradingMode === 'DEFENSIVE' ? 0.5 : 1;
+  const lot = Math.max(0.01, Math.min(0.05, C.baseLot * volFactor * streakFactor * modeFactor));
   document.getElementById('lotSize').textContent = lot.toFixed(2);
   return lot;
 }
@@ -731,53 +934,70 @@ function hasCorrelatedPosition(sym){
   return S.pos.some(p => corr.includes(p.sym) || p.sym === sym);
 }
 
-// Trading Engine
+// =====================================================
+// MAIN TRADING ENGINE WITH SMART EXITS
+// =====================================================
+
 function trade(){
+  // Update profit lock calculations
+  updateProfitLock();
+  
+  // Check trading mode (may block new trades)
+  if(!checkTradingMode()) return;
   if(!checkRiskShield()) return;
 
   const now = Date.now();
 
-  SYM.forEach(sym => {
-    const p = prices[sym.s];
-    if(!p) return;
+  // Only open new positions in NORMAL mode, or very selectively in DEFENSIVE
+  if(tradingMode === 'NORMAL' || (tradingMode === 'DEFENSIVE' && S.pos.length < 2)){
+    SYM.forEach(sym => {
+      const p = prices[sym.s];
+      if(!p) return;
 
-    if(lastTrade[sym.s] && now - lastTrade[sym.s] < C.cooldown) return;
-    if(hasCorrelatedPosition(sym.s)) return;
-    if(S.pos.length >= C.maxPos) return;
+      if(lastTrade[sym.s] && now - lastTrade[sym.s] < C.cooldown) return;
+      if(hasCorrelatedPosition(sym.s)) return;
+      if(S.pos.length >= C.maxPos) return;
 
-    const {sig, strength} = getSignal(sym.s);
+      const {sig, strength, rsi} = getSignal(sym.s);
 
-    if(sig){
-      const lot = calcLotSize(sym.s);
-      // Pip value for forex: 0.01 lot = $0.10 per pip (for most pairs)
-      const pipValue = lot * (sym.s.includes('JPY') ? 100 : 10);
+      if(sig){
+        const lot = calcLotSize(sym.s);
+        const pipValue = lot * (sym.s.includes('JPY') ? 100 : 10);
 
-      const isBuy = sig === 'BUY';
-      const entry = isBuy ? p.ask : p.bid;
-      const tradeId = generateTradeId();
+        const isBuy = sig === 'BUY';
+        const entry = isBuy ? p.ask : p.bid;
+        const tradeId = generateTradeId();
 
-      const newPos = {
-        id: tradeId,
-        sym: sym.s,
-        type: sig,
-        entry,
-        tp: isBuy ? entry + C.tp * sym.p : entry - C.tp * sym.p,
-        sl: isBuy ? entry - C.sl * sym.p : entry + C.sl * sym.p,
-        trail: null,
-        pipValue,
-        pip: sym.p,
-        lot,
-        strength,
-        time: now
-      };
+        const newPos = {
+          id: tradeId,
+          sym: sym.s,
+          type: sig,
+          entry,
+          tp: isBuy ? entry + C.tp * sym.p : entry - C.tp * sym.p,
+          sl: isBuy ? entry - C.sl * sym.p : entry + C.sl * sym.p,
+          originalSL: isBuy ? entry - C.sl * sym.p : entry + C.sl * sym.p,
+          trail: null,
+          trailLevel: 0,       // 0=none, 1=break-even, 2=trail1, 3=trail2, 4=trail3
+          partialClosed: false,
+          pipValue,
+          originalPipValue: pipValue,
+          pip: sym.p,
+          lot,
+          originalLot: lot,
+          strength,
+          entryRSI: rsi,
+          time: now,
+          maxPips: 0           // Track maximum pips reached
+        };
 
-      S.pos.push(newPos);
-      sendWebhook('OPEN', newPos);
-      lastTrade[sym.s] = now;
-      log(`📈 ${sig} ${sym.s} @${fmtP(sym.s, entry)} [${strength}★]`, isBuy ? 'g' : 'r');
-      save();
-    }
-  });
+        S.pos.push(newPos);
+        sendWebhook('OPEN', newPos);
+        lastTrade[sym.s] = now;
+        log(`📈 ${sig} ${sym.s} @${fmtP(sym.s, entry)} [${strength}★]`, isBuy ? 'g' : 'r');
+        save();
+      }
+    });
+  }
 
   managePositions();
 }
@@ -793,39 +1013,118 @@ function managePositions(){
     const cur = isBuy ? p.bid : p.ask;
     const pips = isBuy ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
 
-    if(pips >= C.trail && !pos.trail){
-      pos.trail = cur;
-      log(`🔒 TRAIL ${pos.sym} +${pips.toFixed(1)}p`, 'y');
+    // Track maximum pips reached
+    if(pips > pos.maxPips){
+      pos.maxPips = pips;
     }
 
-    if(pos.trail){
+    // =========================================
+    // SMART TRAILING STOP SYSTEM
+    // =========================================
+    
+    // Level 1: Break-Even Lock
+    if(pips >= C.breakEvenTrigger && pos.trailLevel < 1){
+      pos.trailLevel = 1;
+      pos.sl = isBuy 
+        ? pos.entry + C.breakEvenPlus * pos.pip 
+        : pos.entry - C.breakEvenPlus * pos.pip;
+      log(`🔒 BE ${pos.sym} +${pips.toFixed(1)}p`, 'gold');
+    }
+    
+    // Level 2: Trail 1 (starts at 5 pips)
+    if(pips >= C.trail1Trigger && pos.trailLevel < 2){
+      pos.trailLevel = 2;
+      pos.trail = cur;
+      log(`📍 TRAIL1 ${pos.sym} +${pips.toFixed(1)}p`, 'y');
+    }
+    
+    // Level 3: Trail 2 (tighter at 8 pips)
+    if(pips >= C.trail2Trigger && pos.trailLevel < 3){
+      pos.trailLevel = 3;
+      log(`📍 TRAIL2 ${pos.sym} +${pips.toFixed(1)}p`, 'y');
+    }
+    
+    // Level 4: Trail 3 (very tight at 12 pips)
+    if(pips >= C.trail3Trigger && pos.trailLevel < 4){
+      pos.trailLevel = 4;
+      log(`📍 TRAIL3 ${pos.sym} +${pips.toFixed(1)}p`, 'g');
+    }
+
+    // Update trailing stop based on current level
+    if(pos.trailLevel >= 2 && pos.trail){
+      let trailDist;
+      if(pos.trailLevel === 4) trailDist = C.trail3Distance;
+      else if(pos.trailLevel === 3) trailDist = C.trail2Distance;
+      else trailDist = C.trail1Distance;
+      
       if(isBuy && cur > pos.trail){
         pos.trail = cur;
-        pos.sl = cur - C.trail * pos.pip * 0.4;
+        pos.sl = cur - trailDist * pos.pip;
       } else if(!isBuy && cur < pos.trail){
         pos.trail = cur;
-        pos.sl = cur + C.trail * pos.pip * 0.4;
+        pos.sl = cur + trailDist * pos.pip;
       }
     }
 
-    let reason = null;
-    if(isBuy){
-      if(cur >= pos.tp) reason = 'TP';
-      else if(cur <= pos.sl) reason = pos.trail ? 'TRAIL' : 'SL';
-    } else {
-      if(cur <= pos.tp) reason = 'TP';
-      else if(cur >= pos.sl) reason = pos.trail ? 'TRAIL' : 'SL';
+    // =========================================
+    // PARTIAL PROFIT TAKING
+    // =========================================
+    if(pips >= C.partial1Trigger && !pos.partialClosed){
+      pos.partialClosed = true;
+      const partialPnL = pips * pos.pipValue * C.partial1Pct;
+      S.bal += partialPnL;
+      dailyPnL += partialPnL;
+      
+      // Reduce position size
+      pos.lot = pos.originalLot * (1 - C.partial1Pct);
+      pos.pipValue = pos.originalPipValue * (1 - C.partial1Pct);
+      
+      S.grossWin += partialPnL;
+      log(`💰 PARTIAL ${pos.sym} +$${partialPnL.toFixed(2)} (50% closed)`, 'gold');
     }
 
+    // =========================================
+    // EXIT SIGNAL CHECKS
+    // =========================================
+    let reason = null;
+    
+    // Check TP/SL first
+    if(isBuy){
+      if(cur >= pos.tp) reason = 'TP';
+      else if(cur <= pos.sl) reason = pos.trailLevel > 1 ? 'TRAIL' : (pos.trailLevel === 1 ? 'BE' : 'SL');
+    } else {
+      if(cur <= pos.tp) reason = 'TP';
+      else if(cur >= pos.sl) reason = pos.trailLevel > 1 ? 'TRAIL' : (pos.trailLevel === 1 ? 'BE' : 'SL');
+    }
+    
+    // Check momentum exit (only if in profit and not already exiting)
+    if(!reason && pips > 2){
+      const momExit = checkMomentumExit(pos);
+      if(momExit) reason = momExit;
+    }
+    
+    // Check time-based exit
+    if(!reason){
+      const timeExit = checkTimeExit(pos);
+      if(timeExit) reason = timeExit;
+    }
+
+    // =========================================
+    // CLOSE POSITION
+    // =========================================
     if(reason){
-      const pnl = pips * pos.pipValue;
+      // Calculate remaining position P&L (after partial close)
+      const remainingPips = pips;
+      const pnl = remainingPips * pos.pipValue;
       S.bal += pnl;
       dailyPnL += pnl;
 
-      S.returns.push(pnl / C.start * 100);
+      S.returns.push((pnl + (pos.partialClosed ? C.partial1Trigger * pos.originalPipValue * C.partial1Pct : 0)) / C.start * 100);
       if(S.returns.length > 100) S.returns.shift();
 
-      if(pnl > 0){
+      const totalPnL = pnl + (pos.partialClosed ? C.partial1Trigger * pos.originalPipValue * C.partial1Pct : 0);
+      
+      if(totalPnL > 0){
         S.wins++; S.grossWin += pnl;
         S.streak = S.streak > 0 ? S.streak + 1 : 1;
       } else {
@@ -833,20 +1132,17 @@ function managePositions(){
         S.streak = S.streak < 0 ? S.streak - 1 : -1;
       }
 
-      if(S.bal > S.best) S.best = S.bal;
-      if(S.bal > S.peak) S.peak = S.bal;
-
       sendWebhook('CLOSE', {
         ...pos,
         exitPrice: cur,
         currentPrice: cur,
         reason: reason,
-        pips: pips,
+        pips: remainingPips,
         pnl: pnl
       });
 
-      const em = reason === 'TP' ? '✅' : reason === 'TRAIL' ? '🔒' : '❌';
-      log(`${em} ${reason} ${pos.sym} ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}`, pnl >= 0 ? 'g' : 'r');
+      const em = reason === 'TP' ? '✅' : reason === 'TRAIL' ? '📈' : reason === 'BE' ? '🔒' : reason === 'MOM_REV' ? '↩️' : reason === 'RSI_REV' ? '📊' : reason === 'TIME' ? '⏰' : '❌';
+      log(`${em} ${reason} ${pos.sym} ${totalPnL >= 0 ? '+' : ''}$${totalPnL.toFixed(2)}`, totalPnL >= 0 ? 'g' : 'r');
       toClose.push(i);
     }
   });
@@ -886,12 +1182,17 @@ function render(){
   const wr = total > 0 ? Math.round(S.wins / total * 100) : 0;
   const pf = S.grossLoss > 0 ? (S.grossWin / S.grossLoss).toFixed(2) : '∞';
 
+  // Main stats
   document.getElementById('equity').textContent = '$' + equity.toFixed(2);
   document.getElementById('equity').className = pnl >= 0 ? 'g' : 'r';
-  document.getElementById('pnl').textContent = (pnl >= 0 ? '+' : '') + pnl.toFixed(2);
-  document.getElementById('pnl').className = pnl >= 0 ? 'g' : 'r';
   document.getElementById('pnlPct').textContent = (pnl >= 0 ? '+' : '') + pct.toFixed(2) + '%';
   document.getElementById('pnlPct').className = pnl >= 0 ? 'g' : 'r';
+  
+  // Locked profit display
+  document.getElementById('locked').textContent = '$' + S.lockedProfit.toFixed(2);
+  const lockPct = ((S.lockedProfit / C.start) * 100);
+  document.getElementById('lockPct').textContent = '+' + lockPct.toFixed(1) + '%';
+  
   document.getElementById('trades').textContent = total;
   document.getElementById('winrate').textContent = wr + '%';
   document.getElementById('winrate').className = wr >= 50 ? 'g' : wr >= 40 ? 'y' : 'r';
@@ -901,11 +1202,19 @@ function render(){
   document.getElementById('streak').className = S.streak > 0 ? 'g' : S.streak < 0 ? 'r' : '';
   document.getElementById('best').textContent = '$' + S.best.toFixed(2);
   document.getElementById('avgWin').textContent = '$' + (S.wins > 0 ? (S.grossWin / S.wins).toFixed(2) : '0');
-  document.getElementById('avgLoss').textContent = '$' + (S.losses > 0 ? (S.grossLoss / S.losses).toFixed(2) : '0');
   document.getElementById('sharpe').textContent = calcSharpe();
   document.getElementById('time').textContent = new Date().toLocaleTimeString();
   document.getElementById('status').textContent = '🟢 LIVE';
   document.getElementById('status').className = 'badge on';
+
+  // Progress bars
+  const dailyPct = ((equity - S.dailyStartBal) / S.dailyStartBal) * 100;
+  const targetProgress = Math.min(100, Math.max(0, (dailyPct / C.dailyTarget) * 100));
+  document.getElementById('targetBar').style.width = targetProgress + '%';
+  document.getElementById('targetBar').style.background = dailyPct >= C.dailyTarget ? 'var(--gold)' : 'var(--g)';
+  
+  const lockProgress = S.lockedProfit > 0 ? Math.min(100, (S.lockedProfit / (S.sessionPeak - C.start)) * 100) : 0;
+  document.getElementById('lockBar').style.width = (S.lockedProfit > 0 ? lockProgress : 0) + '%';
 
   // Market table
   document.getElementById('market').innerHTML = SYM.map(sym => {
@@ -919,7 +1228,8 @@ function render(){
       const cur = pos.type === 'BUY' ? p.bid : p.ask;
       const pips = pos.type === 'BUY' ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
       const pnl = pips * pos.pipValue;
-      posH = `<span class="${pnl >= 0 ? 'g' : 'r'}">${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}</span>`;
+      const trailIcon = pos.trailLevel >= 2 ? '📈' : pos.trailLevel === 1 ? '🔒' : '';
+      posH = `<span class="${pnl >= 0 ? 'g' : 'r'}">${trailIcon}${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}</span>`;
     }
 
     let sigH = '-';
@@ -952,8 +1262,10 @@ function render(){
       const cur = pos.type === 'BUY' ? p.bid : p.ask;
       const pips = pos.type === 'BUY' ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
       const pnl = pips * pos.pipValue;
+      const trailIcon = pos.trailLevel >= 2 ? '📈' : pos.trailLevel === 1 ? '🔒' : '';
+      const partialIcon = pos.partialClosed ? '💰' : '';
       return `<div class="log" style="border-left:2px solid ${pnl >= 0 ? 'var(--g)' : 'var(--r)'}">
-        ${pos.sym} <span class="${pos.type === 'BUY' ? 'g' : 'r'}">${pos.type}</span> ${pos.trail ? '🔒' : ''}
+        ${trailIcon}${partialIcon} ${pos.sym} <span class="${pos.type === 'BUY' ? 'g' : 'r'}">${pos.type}</span>
         <span class="${pnl >= 0 ? 'g' : 'r'}">${pips >= 0 ? '+' : ''}${pips.toFixed(1)}p ($${pnl.toFixed(2)})</span>
       </div>`;
     }).join('');
@@ -981,15 +1293,20 @@ function render(){
 // Init
 async function init(){
   loadWebhookConfig();
-  log('🚀 HFT ULTRA FX 2026 Starting...', 'b');
+  log('🚀 HFT ULTRA FX SMART LOCK 2026 Starting...', 'b');
   log('📡 Fetching ECB forex rates...', 'b');
+  
+  // Update config displays
+  document.getElementById('beTrigger').textContent = C.breakEvenTrigger + 'p';
+  document.getElementById('trailStart').textContent = C.trail1Trigger + 'p';
+  document.getElementById('lockPctStat').textContent = C.profitLockPct + '%';
 
   const ok = await fetchECBRates();
   if(ok){
     updatePrices();
     render();
     log('✅ Ready! 28 forex pairs loaded', 'g');
-    log('🛡️ Risk Shield ACTIVE', 'y');
+    log('🛡️ Smart Profit Lock ACTIVE', 'gold');
     if(webhookConfig.url){
       log('🔗 MT5 Webhook ENABLED', 'b');
     }
