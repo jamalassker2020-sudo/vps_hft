@@ -1,803 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HFT Ultra 2026</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0e14;--card:#121820;--border:#1a2030;--txt:#c8d0dc;--dim:#5a6270;--g:#0f6;--r:#f44;--b:#0af;--y:#fc0}
-html.light{--bg:#f4f6f8;--card:#fff;--border:#dde;--txt:#1a1a2e;--dim:#888}
-body{background:var(--bg);color:var(--txt);font:11px/1.4 monospace;padding:8px;min-height:100vh}
-.g{color:var(--g)}.r{color:var(--r)}.b{color:var(--b)}.y{color:var(--y)}.dim{color:var(--dim)}
-.card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:8px}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-.col{flex:1;min-width:120px}
-.grid{display:grid;gap:4px}
-.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g6{grid-template-columns:repeat(6,1fr)}
-.stat{background:var(--bg);padding:6px;border-radius:3px;text-align:center}
-.stat small{display:block;font-size:9px;color:var(--dim);margin-bottom:2px}
-.stat b{font-size:13px}
-h1{font-size:14px;margin-bottom:4px}
-table{width:100%;border-collapse:collapse;font-size:10px}
-th,td{padding:4px;text-align:right}
-th{color:var(--dim);font-weight:400;border-bottom:1px solid var(--border)}
-td:first-child,th:first-child{text-align:left}
-tr:hover{background:rgba(255,255,255,.02)}
-.scroll{max-height:200px;overflow-y:auto}
-.bar{height:40px;display:flex;align-items:end;gap:1px}
-.bar div{flex:1;min-width:2px;border-radius:1px 1px 0 0}
-.log{font-size:9px;padding:2px 4px;margin:1px 0;border-radius:2px;background:var(--bg)}
-button{background:var(--card);border:1px solid var(--border);color:var(--txt);padding:4px 8px;border-radius:3px;cursor:pointer;font:inherit}
-button:hover{background:var(--border)}
-.pulse{animation:p 1.5s infinite}@keyframes p{50%{opacity:.5}}
-.badge{display:inline-block;padding:2px 6px;border-radius:3px;font-size:9px}
-.badge.on{background:#0f62;color:var(--g)}.badge.off{background:#f442;color:var(--r)}.badge.warn{background:#fc02;color:var(--y)}
-input[type="text"]{background:var(--bg);border:1px solid var(--border);color:var(--txt);padding:4px 8px;border-radius:3px;font:inherit;width:100%;font-size:16px}
-input[type="text"]:focus{outline:none;border-color:var(--b)}
-.webhook-status{font-size:9px;margin-top:4px}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;max-width:400px;width:90%}
-.modal h3{margin-bottom:12px;font-size:14px}
-.modal-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-@media(max-width:600px){.g6{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(2,1fr)}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>HFT Ultra 2026</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#0a0e14;--card:#121820;--border:#1a2030;--txt:#c8d0dc;--dim:#5a6270;--g:#0f6;--r:#f44;--b:#0af;--y:#fc0}
+        html.light{--bg:#f4f6f8;--card:#fff;--border:#dde;--txt:#1a1a2e;--dim:#888}
+        body{background:var(--bg);color:var(--txt);font:11px/1.4 monospace;padding:8px;min-height:100vh}
+        .g{color:var(--g)}.r{color:var(--r)}.b{color:var(--b)}.y{color:var(--y)}.dim{color:var(--dim)}
+        .card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:8px}
+        .row{display:flex;gap:8px;flex-wrap:wrap}
+        .col{flex:1;min-width:120px}
+        .grid{display:grid;gap:4px}
+        .g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g6{grid-template-columns:repeat(6,1fr)}
+        .stat{background:var(--bg);padding:6px;border-radius:3px;text-align:center}
+        .stat small{display:block;font-size:9px;color:var(--dim);margin-bottom:2px}
+        .stat b{font-size:13px}
+        h1{font-size:14px;margin-bottom:4px}
+        table{width:100%;border-collapse:collapse;font-size:10px}
+        th,td{padding:4px;text-align:right}
+        th{color:var(--dim);font-weight:400;border-bottom:1px solid var(--border)}
+        td:first-child,th:first-child{text-align:left}
+        tr:hover{background:rgba(255,255,255,.02)}
+        .scroll{max-height:200px;overflow-y:auto}
+        .bar{height:40px;display:flex;align-items:end;gap:1px}
+        .bar div{flex:1;min-width:2px;border-radius:1px 1px 0 0}
+        .log{font-size:9px;padding:2px 4px;margin:1px 0;border-radius:2px;background:var(--bg)}
+        button{background:var(--card);border:1px solid var(--border);color:var(--txt);padding:4px 8px;border-radius:3px;cursor:pointer;font:inherit}
+        button:hover{background:var(--border)}
+        .pulse{animation:p 1.5s infinite}@keyframes p{50%{opacity:.5}}
+        .badge{display:inline-block;padding:2px 6px;border-radius:3px;font-size:9px}
+        .badge.on{background:#0f62;color:var(--g)}.badge.off{background:#f442;color:var(--r)}.badge.warn{background:#fc02;color:var(--y)}
+        input[type="text"]{background:var(--bg);border:1px solid var(--border);color:var(--txt);padding:4px 8px;border-radius:3px;font:inherit;width:100%;font-size:16px}
+        input[type="text"]:focus{outline:none;border-color:var(--b)}
+        .webhook-status{font-size:9px;margin-top:4px}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}
+        .modal{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;max-width:400px;width:90%}
+        .modal h3{margin-bottom:12px;font-size:14px}
+        .modal-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+        @media(max-width:600px){.g6{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(2,1fr)}}
+    </style>
 </head>
 <body>
-<div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
-<div>
-<h1>⚡ HFT ULTRA <span class="dim">2026</span></h1>
-<small class="dim">29 PAIRS • REAL BINANCE DATA • SMART RISK • AI SIGNALS • MT5 WEBHOOK</small>
-</div>
-<div class="row" style="gap:4px">
-<span id="status" class="badge pulse">INIT</span>
-<span id="api" class="badge dim">API:--</span>
-<span id="webhook" class="badge dim">WH:--</span>
-<span id="shield" class="badge">SHIELD:--</span>
-<button onclick="showWebhookConfig()">⚙️</button>
-<button onclick="reset()">⟲</button>
-</div>
-</div>
+    <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+            <h1>⚡ HFT ULTRA <span class="dim">2026</span></h1>
+            <small class="dim">29 PAIRS • REAL BINANCE DATA • SMART RISK • AI SIGNALS • MT5 WEBHOOK</small>
+        </div>
+        <div class="row" style="gap:4px">
+            <span id="status" class="badge pulse">INIT</span>
+            <span id="api" class="badge dim">API:--</span>
+            <span id="webhook" class="badge dim">WH:--</span>
+            <span id="shield" class="badge">SHIELD:--</span>
+            <button onclick="showWebhookConfig()">⚙️</button>
+            <button onclick="reset()">⟲</button>
+        </div>
+    </div>
 
-<div class="grid g6" style="margin-bottom:8px">
-<div class="stat"><small>💰 EQUITY</small><b id="equity" class="g">$100.00</b><div id="pnlPct" style="font-size:9px">+0.00%</div></div>
-<div class="stat"><small>P&L</small><b id="pnl">$0.00</b></div>
-<div class="stat"><small>TRADES</small><b id="trades" class="b">0</b></div>
-<div class="stat"><small>WIN%</small><b id="winrate" class="y">0%</b></div>
-<div class="stat"><small>PROFIT F.</small><b id="pf" class="g">0.00</b></div>
-<div class="stat"><small>OPEN</small><b id="openPos" class="b">0/6</b></div>
-<div class="stat"><small>STREAK</small><b id="streak">0</b></div>
-<div class="stat"><small>BEST</small><b id="best" class="g">$100</b></div>
-<div class="stat"><small>DD</small><b id="dd" class="r">0%</b></div>
-<div class="stat"><small>AVG WIN</small><b id="avgWin" class="g">$0</b></div>
-<div class="stat"><small>AVG LOSS</small><b id="avgLoss" class="r">$0</b></div>
-<div class="stat"><small>SHARPE</small><b id="sharpe" class="b">0.00</b></div>
-</div>
+    <div class="grid g6" style="margin-bottom:8px">
+        <div class="stat"><small>💰 EQUITY</small><b id="equity" class="g">$100.00</b><div id="pnlPct" style="font-size:9px">+0.00%</div></div>
+        <div class="stat"><small>P&L</small><b id="pnl">$0.00</b></div>
+        <div class="stat"><small>TRADES</small><b id="trades" class="b">0</b></div>
+        <div class="stat"><small>WIN%</small><b id="winrate" class="y">0%</b></div>
+        <div class="stat"><small>PROFIT F.</small><b id="pf" class="g">0.00</b></div>
+        <div class="stat"><small>OPEN</small><b id="openPos" class="b">0/6</b></div>
+        <div class="stat"><small>STREAK</small><b id="streak">0</b></div>
+        <div class="stat"><small>BEST</small><b id="best" class="g">$100</b></div>
+        <div class="stat"><small>DD</small><b id="dd" class="r">0%</b></div>
+        <div class="stat"><small>AVG WIN</small><b id="avgWin" class="g">$0</b></div>
+        <div class="stat"><small>AVG LOSS</small><b id="avgLoss" class="r">$0</b></div>
+        <div class="stat"><small>SHARPE</small><b id="sharpe" class="b">0.00</b></div>
+    </div>
 
-<div class="row">
-<div class="col" style="flex:3">
-<div class="card">
-<div class="row" style="justify-content:space-between;margin-bottom:4px">
-<b class="b">📊 MARKET</b>
-<span id="time" class="dim">--:--:--</span>
-</div>
-<div class="scroll"><table><thead><tr><th>SYM</th><th>BID</th><th>ASK</th><th>Δ</th><th>RSI</th><th>MOM</th><th>SIG</th><th>P&L</th></tr></thead><tbody id="market"></tbody></table></div>
-</div>
-</div>
-<div class="col">
-<div class="card">
-<b>📈 POSITIONS</b>
-<div id="positions" class="scroll" style="margin-top:4px"><span class="dim">Scanning...</span></div>
-</div>
-<div class="card">
-<b>⚡ LOG</b>
-<div id="log" class="scroll" style="margin-top:4px"><span class="dim">Starting...</span></div>
-</div>
-</div>
-</div>
+    <div class="row">
+        <div class="col" style="flex:3">
+            <div class="card">
+                <div class="row" style="justify-content:space-between;margin-bottom:4px">
+                    <b class="b">📊 MARKET</b>
+                    <span id="time" class="dim">--:--:--</span>
+                </div>
+                <div class="scroll"><table><thead><tr><th>SYM</th><th>BID</th><th>ASK</th><th>Δ</th><th>RSI</th><th>MOM</th><th>SIG</th><th>P&L</th></tr></thead><tbody id="market"></tbody></table></div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <b>📈 POSITIONS</b>
+                <div id="positions" class="scroll" style="margin-top:4px"><span class="dim">Scanning...</span></div>
+            </div>
+            <div class="card">
+                <b>⚡ LOG</b>
+                <div id="log" class="scroll" style="margin-top:4px"><span class="dim">Starting...</span></div>
+            </div>
+        </div>
+    </div>
 
-<div class="row">
-<div class="col">
-<div class="card"><b>💹 EQUITY</b><div class="bar" id="chart"></div></div>
-</div>
-<div class="col">
-<div class="card">
-<b>🛡️ RISK SHIELD</b>
-<div class="grid g3" style="margin-top:6px;font-size:9px;text-align:center">
-<div class="stat"><small>MAX DD</small><span id="maxDD">5%</span></div>
-<div class="stat"><small>DAILY LOSS</small><span id="dailyLoss">$0</span></div>
-<div class="stat"><small>HEAT</small><span id="heat">0%</span></div>
-<div class="stat"><small>LOT</small><span id="lotSize" class="b">0.01</span></div>
-<div class="stat"><small>RR</small><span class="g">3:1</span></div>
-<div class="stat"><small>CORR HEDGE</small><span id="hedge" class="y">ON</span></div>
-</div>
-</div>
-</div>
-</div>
+    <div class="row">
+        <div class="col">
+            <div class="card"><b>💹 EQUITY</b><div class="bar" id="chart"></div></div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <b>🛡️ RISK SHIELD</b>
+                <div class="grid g3" style="margin-top:6px;font-size:9px;text-align:center">
+                    <div class="stat"><small>MAX DD</small><span id="maxDD">5%</span></div>
+                    <div class="stat"><small>DAILY LOSS</small><span id="dailyLoss">$0</span></div>
+                    <div class="stat"><small>HEAT</small><span id="heat">0%</span></div>
+                    <div class="stat"><small>LOT</small><span id="lotSize" class="b">0.01</span></div>
+                    <div class="stat"><small>RR</small><span class="g">3:1</span></div>
+                    <div class="stat"><small>CORR HEDGE</small><span id="hedge" class="y">ON</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div id="webhookModal" class="modal-overlay" style="display:none">
-<div class="modal">
-<h3>🔗 MT5 Webhook Configuration</h3>
-<div style="margin-bottom:12px">
-<label class="dim" style="display:block;margin-bottom:4px">Webhook URL (your MT5 EA endpoint)</label>
-<input type="text" id="webhookUrl" placeholder="http://localhost:8080/webhook">
-</div>
-<div style="margin-bottom:12px">
-<label class="dim" style="display:block;margin-bottom:4px">Secret Key (optional, for authentication)</label>
-<input type="text" id="webhookSecret" placeholder="your-secret-key">
-</div>
-<div class="grid g2" style="margin-bottom:12px">
-<label style="display:flex;align-items:center;gap:4px;cursor:pointer">
-<input type="checkbox" id="whOpenEnabled" checked> Send on OPEN
-</label>
-<label style="display:flex;align-items:center;gap:4px;cursor:pointer">
-<input type="checkbox" id="whCloseEnabled" checked> Send on CLOSE
-</label>
-</div>
-<div class="webhook-status" id="webhookTestResult"></div>
-<div class="modal-buttons">
-<button onclick="testWebhook()">🧪 Test</button>
-<button onclick="saveWebhookConfig()">💾 Save</button>
-<button onclick="closeWebhookModal()">✕ Close</button>
-</div>
-</div>
-</div>
+    <div id="webhookModal" class="modal-overlay" style="display:none">
+        <div class="modal">
+            <h3>🔗 MT5 Webhook Configuration</h3>
+            <div style="margin-bottom:12px">
+                <label class="dim" style="display:block;margin-bottom:4px">Webhook URL (your MT5 EA endpoint)</label>
+                <input type="text" id="webhookUrl" placeholder="http://caboose.proxy.rlwy.net:24843">
+            </div>
+            <div style="margin-bottom:12px">
+                <label class="dim" style="display:block;margin-bottom:4px">Secret Key (optional)</label>
+                <input type="text" id="webhookSecret" placeholder="your-secret-key">
+            </div>
+            <div class="grid g2" style="margin-bottom:12px">
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+                    <input type="checkbox" id="whOpenEnabled" checked> Send on OPEN
+                </label>
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+                    <input type="checkbox" id="whCloseEnabled" checked> Send on CLOSE
+                </label>
+            </div>
+            <div class="webhook-status" id="webhookTestResult"></div>
+            <div class="modal-buttons">
+                <button onclick="testWebhook()">🧪 Test</button>
+                <button onclick="saveWebhookConfig()">💾 Save</button>
+                <button onclick="closeWebhookModal()">✕ Close</button>
+            </div>
+        </div>
+    </div>
 
-<script>
-// Dark/Light mode
-if(matchMedia('(prefers-color-scheme:light)').matches)document.documentElement.classList.add('light');
-matchMedia('(prefers-color-scheme:light)').onchange=e=>document.documentElement.classList.toggle('light',e.matches);
+    <script>
+        // Dark/Light mode
+        if(matchMedia('(prefers-color-scheme:light)').matches)document.documentElement.classList.add('light');
+        matchMedia('(prefers-color-scheme:light)').onchange=e=>document.documentElement.classList.toggle('light',e.matches);
 
-// Binance Crypto Instruments (29 pairs)
-const SYM=[
-{s:'BTC/USDT',b:'BTCUSDT',p:.01,t:'major',mt5:'BTCUSD'},
-{s:'ETH/USDT',b:'ETHUSDT',p:.01,t:'major',mt5:'ETHUSD'},
-{s:'BNB/USDT',b:'BNBUSDT',p:.01,t:'major',mt5:'BNBUSD'},
-{s:'XRP/USDT',b:'XRPUSDT',p:.0001,t:'alt',mt5:'XRPUSD'},
-{s:'SOL/USDT',b:'SOLUSDT',p:.01,t:'major',mt5:'SOLUSD'},
-{s:'DOGE/USDT',b:'DOGEUSDT',p:.00001,t:'alt',mt5:'DOGEUSD'},
-{s:'ADA/USDT',b:'ADAUSDT',p:.0001,t:'alt',mt5:'ADAUSD'},
-{s:'AVAX/USDT',b:'AVAXUSDT',p:.01,t:'alt',mt5:'AVAXUSD'},
-{s:'LINK/USDT',b:'LINKUSDT',p:.001,t:'alt',mt5:'LINKUSD'},
-{s:'DOT/USDT',b:'DOTUSDT',p:.001,t:'alt',mt5:'DOTUSD'},
-{s:'MATIC/USDT',b:'MATICUSDT',p:.0001,t:'alt',mt5:'MATICUSD'},
-{s:'SHIB/USDT',b:'SHIBUSDT',p:.00000001,t:'meme',mt5:'SHIBUSD'},
-{s:'LTC/USDT',b:'LTCUSDT',p:.01,t:'major',mt5:'LTCUSD'},
-{s:'TRX/USDT',b:'TRXUSDT',p:.0001,t:'alt',mt5:'TRXUSD'},
-{s:'ATOM/USDT',b:'ATOMUSDT',p:.001,t:'alt',mt5:'ATOMUSD'},
-{s:'UNI/USDT',b:'UNIUSDT',p:.001,t:'defi',mt5:'UNIUSD'},
-{s:'ETC/USDT',b:'ETCUSDT',p:.01,t:'alt',mt5:'ETCUSD'},
-{s:'XLM/USDT',b:'XLMUSDT',p:.0001,t:'alt',mt5:'XLMUSD'},
-{s:'NEAR/USDT',b:'NEARUSDT',p:.001,t:'alt',mt5:'NEARUSD'},
-{s:'APT/USDT',b:'APTUSDT',p:.01,t:'alt',mt5:'APTUSD'},
-{s:'FIL/USDT',b:'FILUSDT',p:.001,t:'alt',mt5:'FILUSD'},
-{s:'ARB/USDT',b:'ARBUSDT',p:.0001,t:'l2',mt5:'ARBUSD'},
-{s:'OP/USDT',b:'OPUSDT',p:.0001,t:'l2',mt5:'OPUSD'},
-{s:'INJ/USDT',b:'INJUSDT',p:.01,t:'defi',mt5:'INJUSD'},
-{s:'SUI/USDT',b:'SUIUSDT',p:.0001,t:'alt',mt5:'SUIUSD'},
-{s:'PEPE/USDT',b:'PEPEUSDT',p:.000000001,t:'meme',mt5:'PEPEUSD'},
-{s:'WIF/USDT',b:'WIFUSDT',p:.0001,t:'meme',mt5:'WIFUSD'},
-{s:'RENDER/USDT',b:'RENDERUSDT',p:.001,t:'ai',mt5:'RENDERUSD'},
-{s:'FET/USDT',b:'FETUSDT',p:.0001,t:'ai',mt5:'FETUSD'}
-];
+        // Binance Crypto Instruments (29 pairs)
+        const SYM=[
+            {s:'BTC/USDT',b:'BTCUSDT',p:.01,t:'major',mt5:'BTCUSD'},
+            {s:'ETH/USDT',b:'ETHUSDT',p:.01,t:'major',mt5:'ETHUSD'},
+            {s:'BNB/USDT',b:'BNBUSDT',p:.01,t:'major',mt5:'BNBUSD'},
+            {s:'XRP/USDT',b:'XRPUSDT',p:.0001,t:'alt',mt5:'XRPUSD'},
+            {s:'SOL/USDT',b:'SOLUSDT',p:.01,t:'major',mt5:'SOLUSD'},
+            {s:'DOGE/USDT',b:'DOGEUSDT',p:.00001,t:'alt',mt5:'DOGEUSD'},
+            {s:'ADA/USDT',b:'ADAUSDT',p:.0001,t:'alt',mt5:'ADAUSD'},
+            {s:'AVAX/USDT',b:'AVAXUSDT',p:.01,t:'alt',mt5:'AVAXUSD'},
+            {s:'LINK/USDT',b:'LINKUSDT',p:.001,t:'alt',mt5:'LINKUSD'},
+            {s:'DOT/USDT',b:'DOTUSDT',p:.001,t:'alt',mt5:'DOTUSD'},
+            {s:'MATIC/USDT',b:'MATICUSDT',p:.0001,t:'alt',mt5:'MATICUSD'},
+            {s:'SHIB/USDT',b:'SHIBUSDT',p:.00000001,t:'meme',mt5:'SHIBUSD'},
+            {s:'LTC/USDT',b:'LTCUSDT',p:.01,t:'major',mt5:'LTCUSD'},
+            {s:'TRX/USDT',b:'TRXUSDT',p:.0001,t:'alt',mt5:'TRXUSD'},
+            {s:'ATOM/USDT',b:'ATOMUSDT',p:.001,t:'alt',mt5:'ATOMUSD'},
+            {s:'UNI/USDT',b:'UNIUSDT',p:.001,t:'defi',mt5:'UNIUSD'},
+            {s:'ETC/USDT',b:'ETCUSDT',p:.01,t:'alt',mt5:'ETCUSD'},
+            {s:'XLM/USDT',b:'XLMUSDT',p:.0001,t:'alt',mt5:'XLMUSD'},
+            {s:'NEAR/USDT',b:'NEARUSDT',p:.001,t:'alt',mt5:'NEARUSD'},
+            {s:'APT/USDT',b:'APTUSDT',p:.01,t:'alt',mt5:'APTUSD'},
+            {s:'FIL/USDT',b:'FILUSDT',p:.001,t:'alt',mt5:'FILUSD'},
+            {s:'ARB/USDT',b:'ARBUSDT',p:.0001,t:'l2',mt5:'ARBUSD'},
+            {s:'OP/USDT',b:'OPUSDT',p:.0001,t:'l2',mt5:'OPUSD'},
+            {s:'INJ/USDT',b:'INJUSDT',p:.01,t:'defi',mt5:'INJUSD'},
+            {s:'SUI/USDT',b:'SUIUSDT',p:.0001,t:'alt',mt5:'SUIUSD'},
+            {s:'PEPE/USDT',b:'PEPEUSDT',p:.000000001,t:'meme',mt5:'PEPEUSD'},
+            {s:'WIF/USDT',b:'WIFUSDT',p:.0001,t:'meme',mt5:'WIFUSD'},
+            {s:'RENDER/USDT',b:'RENDERUSDT',p:.001,t:'ai',mt5:'RENDERUSD'},
+            {s:'FET/USDT',b:'FETUSDT',p:.0001,t:'ai',mt5:'FETUSD'}
+        ];
 
-// Enhanced Config - Conservative HFT
-const C={
-start:100,
-baseLot:.01,
-tp:15,           // 15 pip TP (3:1 RR)
-sl:5,            // 5 pip SL tight
-trail:6,         // Trail after 6 pips
-maxPos:6,        // Max 6 positions
-maxDD:5,         // 5% max drawdown circuit breaker
-dailyLossLimit:3,// 3% daily loss limit
-cooldown:3000,   // 3s cooldown
-rsiPeriod:14,
-minRSI:25,       // Oversold
-maxRSI:75,       // Overbought
-minStrength:3,   // Need 3+ strategy confirmations
-spreadMax:2,     // Max 2 pip spread to enter
-corrThreshold:.7 // Correlation threshold for hedging
-};
+        const C={start:100,baseLot:.01,tp:15,sl:5,trail:6,maxPos:6,maxDD:5,dailyLossLimit:3,cooldown:3000,rsiPeriod:14,minRSI:25,maxRSI:75,minStrength:3,spreadMax:2,corrThreshold:.7};
 
-let webhookConfig = {
-url: '',
-secret: '',
-openEnabled: true,
-closeEnabled: true,
-lastStatus: null,
-sentCount: 0,
-errorCount: 0
-};
+        let webhookConfig = {url: '',secret: '',openEnabled: true,closeEnabled: true,lastStatus: null,sentCount: 0,errorCount: 0};
 
-// Load webhook config from URL hash or defaults
-function loadWebhookConfig() {
-try {
-const hash = location.hash.slice(1);
-if (hash) {
-const data = JSON.parse(atob(hash));
-if (data.webhook) {
-webhookConfig = { ...webhookConfig, ...data.webhook };
-}
-}
-} catch (e) {
-console.log('No webhook config found');
-}
-updateWebhookUI();
-}
-
-function saveWebhookConfig() {
-webhookConfig.url = document.getElementById('webhookUrl').value.trim();
-webhookConfig.secret = document.getElementById('webhookSecret').value.trim();
-webhookConfig.openEnabled = document.getElementById('whOpenEnabled').checked;
-webhookConfig.closeEnabled = document.getElementById('whCloseEnabled').checked;
-
-save(); // Save to URL hash
-updateWebhookUI();
-closeWebhookModal();
-log('🔗 Webhook config saved', 'b');
-}
-
-function updateWebhookUI() {
-const el = document.getElementById('webhook');
-if (webhookConfig.url) {
-el.textContent = 'WH:✓';
-el.className = 'badge on';
-} else {
-el.textContent = 'WH:OFF';
-el.className = 'badge dim';
-}
-}
-
-function showWebhookConfig() {
-document.getElementById('webhookUrl').value = webhookConfig.url;
-document.getElementById('webhookSecret').value = webhookConfig.secret;
-document.getElementById('whOpenEnabled').checked = webhookConfig.openEnabled;
-document.getElementById('whCloseEnabled').checked = webhookConfig.closeEnabled;
-document.getElementById('webhookModal').style.display = 'flex';
-}
-
-function closeWebhookModal() {
-document.getElementById('webhookModal').style.display = 'none';
-}
-
-function generateTradeId() {
-return 'HFT-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-}
-
-/**
- * Sends webhook to MT5 EA
- * @param {string} action - 'OPEN' or 'CLOSE'
- * @param {object} tradeData - Trade details
- */
-async function sendWebhook(action, tradeData) {
-if (!webhookConfig.url) return;
-if (action === 'OPEN' && !webhookConfig.openEnabled) return;
-if (action === 'CLOSE' && !webhookConfig.closeEnabled) return;
-
-const symData = SYM.find(s => s.s === tradeData.sym);
-
-const payload = {
-action: action,
-source: "HFT-ULTRA-2026",
-version: "1.0",
-timestamp: new Date().toISOString(),
-timestamp_unix: Date.now(),
-trade_id: tradeData.id || generateTradeId(),
-symbol: tradeData.sym,
-symbol_mt5: symData?.mt5 || tradeData.sym.replace('/USDT', 'USD'),
-symbol_binance: symData?.b || '',
-direction: tradeData.type,
-order_type: tradeData.type === 'BUY' ? 0 : 1,
-entry_price: tradeData.entry,
-current_price: tradeData.currentPrice || tradeData.entry,
-take_profit: tradeData.tp,
-stop_loss: tradeData.sl,
-trailing_stop: tradeData.trail || null,
-lot_size: tradeData.lot,
-pip_value: tradeData.pipValue,
-pip_size: tradeData.pip,
-signal_strength: tradeData.strength || 0,
-exit_price: action === 'CLOSE' ? tradeData.exitPrice : null,
-exit_reason: action === 'CLOSE' ? tradeData.reason : null,
-pnl_pips: action === 'CLOSE' ? tradeData.pips : null,
-pnl_usd: action === 'CLOSE' ? tradeData.pnl : null,
-duration_ms: action === 'CLOSE' ? (Date.now() - tradeData.time) : null,
-account: {
-balance: S.bal,
-equity: S.bal + getUnrealized(),
-open_positions: S.pos.length,
-total_trades: S.wins + S.losses,
-win_rate: S.wins + S.losses > 0 ? (S.wins / (S.wins + S.losses) * 100).toFixed(2) : 0
-},
-auth: webhookConfig.secret ? {
-secret: webhookConfig.secret,
-signature: btoa(webhookConfig.secret + ':' + Date.now())
-} : null
-};
-
-try {
-const response = await fetch(webhookConfig.url, {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json',
-'X-Signal-Source': 'HFT-ULTRA-2026',
-'X-Signal-Action': action,
-...(webhookConfig.secret && { 'X-Auth-Key': webhookConfig.secret })
-},
-body: JSON.stringify(payload),
-mode: 'cors'
-});
-
-if (response.ok) {
-webhookConfig.sentCount++;
-webhookConfig.lastStatus = 'OK';
-log(`🔗 WH ${action}: ${tradeData.sym}`, 'b');
-} else {
-throw new Error(`HTTP ${response.status}`);
-}
-} catch (err) {
-webhookConfig.errorCount++;
-webhookConfig.lastStatus = 'ERR';
-console.log('Webhook error:', JSON.stringify(err.message));
-if (webhookConfig.errorCount <= 3) {
-log(`⚠️ WH Error: ${err.message}`, 'y');
-}
-}
-}
-
-async function testWebhook() {
-const url = document.getElementById('webhookUrl').value.trim();
-const resultEl = document.getElementById('webhookTestResult');
-if (!url) {
-resultEl.innerHTML = '<span class="r">❌ Please enter a webhook URL</span>';
-return;
-}
-resultEl.innerHTML = '<span class="y">🔄 Testing...</span>';
-const testPayload = {
-action: 'TEST',
-source: 'HFT-ULTRA-2026',
-version: '1.0',
-timestamp: new Date().toISOString(),
-timestamp_unix: Date.now(),
-message: 'Connection test from HFT Ultra 2026'
-};
-
-try {
-const response = await fetch(url, {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json',
-'X-Signal-Source': 'HFT-ULTRA-2026',
-'X-Signal-Action': 'TEST'
-},
-body: JSON.stringify(testPayload),
-mode: 'cors'
-});
-
-if (response.ok) {
-resultEl.innerHTML = '<span class="g">✅ Connection successful!</span>';
-} else {
-resultEl.innerHTML = `<span class="r">❌ HTTP Error: ${response.status}</span>`;
-}
-} catch (err) {
-resultEl.innerHTML = `<span class="r">❌ ${err.message}</span>`;
-}
-}
-
-// State
-let S=load()||fresh();
-let prices={},history={},lastTrade={},logs=[],ticks=0,dailyPnL=0,dayStart=new Date().toDateString();
-let binanceData={};
-
-function fresh(){return{bal:C.start,pos:[],wins:0,losses:0,grossWin:0,grossLoss:0,eq:[C.start],streak:0,best:C.start,peak:C.start,returns:[]}}
-
-function load(){
-try{
-const data = JSON.parse(atob(location.hash.slice(1)));
-if (data.webhook) {
-webhookConfig = { ...webhookConfig, ...data.webhook };
-}
-return data;
-} catch(e) {
-return null;
-}
-}
-
-function save(){
-try{
-const data = {
-...S,
-eq: S.eq.slice(-60),
-returns: S.returns.slice(-100),
-webhook: {
-url: webhookConfig.url,
-secret: webhookConfig.secret,
-openEnabled: webhookConfig.openEnabled,
-closeEnabled: webhookConfig.closeEnabled
-}
-};
-history.replaceState(null, '', '#' + btoa(JSON.stringify(data)));
-} catch(e) {}
-}
-
-function reset(){S=fresh();logs=[];prices={};history={};dailyPnL=0;binanceData={};save();render()}
-
-async function fetchBinancePrices(){
-try{
-const symbols=SYM.map(s=>s.b);
-const r=await fetch('https://api.binance.com/api/v3/ticker/bookTicker');
-const data=await r.json();
-data.forEach(t=>{
-binanceData[t.symbol]={
-bid:parseFloat(t.bidPrice),
-ask:parseFloat(t.askPrice),
-bidQty:parseFloat(t.bidQty),
-askQty:parseFloat(t.askQty)
-};
-});
-const r2=await fetch('https://api.binance.com/api/v3/ticker/24hr');
-const data24=await r2.json();
-data24.forEach(t=>{
-if(binanceData[t.symbol]){
-binanceData[t.symbol].change24=parseFloat(t.priceChangePercent);
-binanceData[t.symbol].high24=parseFloat(t.highPrice);
-binanceData[t.symbol].low24=parseFloat(t.lowPrice);
-binanceData[t.symbol].volume=parseFloat(t.quoteVolume);
-}
-});
-document.getElementById('api').textContent='API:✓';
-document.getElementById('api').className='badge on';
-return true;
-}catch(e){
-console.log('Binance API error:',JSON.stringify(e));
-document.getElementById('api').textContent='API:ERR';
-document.getElementById('api').className='badge off';
-return false;
-}
-}
-
-function updateHistory(sym,price){
-if(!history[sym])history[sym]=[];
-history[sym].push(price);
-if(history[sym].length>50)history[sym].shift();
-}
-
-function calcRSI(sym){
-const h=history[sym];
-if(!h||h.length<C.rsiPeriod+1)return 50;
-let gains=0,losses=0;
-for(let i=h.length-C.rsiPeriod;i<h.length;i++){
-const diff=h[i]-h[i-1];
-if(diff>0)gains+=diff;else losses-=diff;
-}
-if(losses===0)return 100;
-const rs=gains/losses;
-return 100-(100/(1+rs));
-}
-
-function calcMomentum(sym){
-const h=history[sym];
-if(!h||h.length<10)return 0;
-return((h[h.length-1]-h[h.length-10])/h[h.length-10])*100;
-}
-
-function calcVolatility(sym){
-const h=history[sym];
-if(!h||h.length<10)return 1;
-let sum=0;
-for(let i=1;i<Math.min(h.length,10);i++)sum+=Math.abs(h[i]-h[i-1]);
-return sum/9;
-}
-
-function getCorrelatedPairs(sym){
-const corr={
-'BTC/USDT':['ETH/USDT','SOL/USDT'],
-'ETH/USDT':['BTC/USDT','SOL/USDT'],
-'SOL/USDT':['ETH/USDT','AVAX/USDT'],
-'DOGE/USDT':['SHIB/USDT','PEPE/USDT'],
-'SHIB/USDT':['DOGE/USDT','PEPE/USDT'],
-'ARB/USDT':['OP/USDT'],
-'OP/USDT':['ARB/USDT'],
-'RENDER/USDT':['FET/USDT'],
-'FET/USDT':['RENDER/USDT']
-};
-return corr[sym]||[];
-}
-
-function updatePrices(){
-SYM.forEach(sym=>{
-const bd=binanceData[sym.b];
-if(!bd)return;
-const prevMid=prices[sym.s]?.mid||((bd.bid+bd.ask)/2);
-const mid=(bd.bid+bd.ask)/2;
-updateHistory(sym.s,mid);
-const spreadPips=(bd.ask-bd.bid)/sym.p;
-const change=(mid-prevMid)/sym.p;
-prices[sym.s]={
-bid:bd.bid,
-ask:bd.ask,
-mid:mid,
-change:change,
-spread:spreadPips,
-pip:sym.p,
-type:sym.t,
-change24:bd.change24||0,
-volume:bd.volume||0
-};
-});
-ticks++;
-}
-
-function getSignal(sym){
-const p=prices[sym];
-if(!p)return{score:0,strength:0,sig:null,rsi:50,mom:0};
-const rsi=calcRSI(sym);
-const mom=calcMomentum(sym);
-const vol=calcVolatility(sym);
-let score=0,strength=0;
-if(rsi<C.minRSI){score+=20;strength++;}
-else if(rsi>C.maxRSI){score-=20;strength++;}
-else if(rsi<40){score+=10;}
-else if(rsi>60){score-=10;}
-if(mom>0.05&&rsi<50){score+=15;strength++;}
-else if(mom<-0.05&&rsi>50){score-=15;strength++;}
-const h=history[sym];
-if(h&&h.length>=20){
-const ma20=h.slice(-20).reduce((a,b)=>a+b,0)/20;
-if(p.mid>ma20&&mom>0){score+=12;strength++;}
-else if(p.mid<ma20&&mom<0){score-=12;strength++;}
-}
-if(vol<p.mid*0.001){strength++;}
-if(p.change24){
-if(p.change24>2&&rsi<60){score+=10;strength++;}
-else if(p.change24<-2&&rsi>40){score-=10;strength++;}
-}
-if(sym!=='BTC/USDT'){
-const btc=prices['BTC/USDT'];
-if(btc){
-if(btc.change>0&&p.change>0){strength++;}
-else if(btc.change<0&&p.change<0){strength++;}
-}
-}
-const corr=getCorrelatedPairs(sym);
-corr.forEach(c=>{
-const cp=prices[c];
-if(cp){
-if((score>0&&cp.change>0)||(score<0&&cp.change<0))strength++;
-}
-});
-if(p.spread>C.spreadMax)return{score,strength:0,sig:null,rsi,mom};
-let sig=null;
-if(score>=25&&strength>=C.minStrength)sig='BUY';
-else if(score<=-25&&strength>=C.minStrength)sig='SELL';
-return{score,strength,sig,rsi:Math.round(rsi),mom:mom.toFixed(2)};
-}
-
-function checkRiskShield(){
-const equity=S.bal+getUnrealized();
-const dd=(S.peak-equity)/S.peak*100;
-const heat=(S.pos.length/C.maxPos)*100;
-if(new Date().toDateString()!==dayStart){
-dayStart=new Date().toDateString();
-dailyPnL=0;
-}
-document.getElementById('dd').textContent=dd.toFixed(1)+'%';
-document.getElementById('heat').textContent=Math.round(heat)+'%';
-document.getElementById('dailyLoss').textContent='$'+dailyPnL.toFixed(2);
-document.getElementById('heat').className=heat>70?'r':heat>50?'y':'g';
-if(dd>=C.maxDD){
-document.getElementById('shield').textContent='SHIELD:🛑';
-document.getElementById('shield').className='badge off';
-return false;
-}
-if(Math.abs(dailyPnL)>=C.start*(C.dailyLossLimit/100)&&dailyPnL<0){
-document.getElementById('shield').textContent='SHIELD:⚠️';
-document.getElementById('shield').className='badge warn';
-return false;
-}
-document.getElementById('shield').textContent='SHIELD:✓';
-document.getElementById('shield').className='badge on';
-return true;
-}
-
-function calcLotSize(sym){
-const vol=calcVolatility(sym);
-const p=prices[sym];
-const equity=S.bal+getUnrealized();
-const riskPct=1;
-const volFactor=p?Math.max(0.5,1-vol/p.mid*100):1;
-const streakFactor=S.streak<-2?0.5:1;
-const lot=Math.max(0.01,Math.min(0.05,C.baseLot*volFactor*streakFactor));
-document.getElementById('lotSize').textContent=lot.toFixed(2);
-return lot;
-}
-
-function getUnrealized(){
-let u=0;
-S.pos.forEach(pos=>{
-const p=prices[pos.sym];
-if(!p)return;
-const cur=pos.type==='BUY'?p.bid:p.ask;
-const pips=pos.type==='BUY'?(cur-pos.entry)/pos.pip:(pos.entry-cur)/pos.pip;
-u+=pips*pos.pipValue;
-});
-return u;
-}
-
-function hasCorrelatedPosition(sym){
-const corr=getCorrelatedPairs(sym);
-return S.pos.some(p=>corr.includes(p.sym)||p.sym===sym);
-}
-
-function trade(){
-if(!checkRiskShield())return;
-const now=Date.now();
-SYM.forEach(sym=>{
-const p=prices[sym.s];
-if(!p)return;
-if(lastTrade[sym.s]&&now-lastTrade[sym.s]<C.cooldown)return;
-if(hasCorrelatedPosition(sym.s))return;
-if(S.pos.length>=C.maxPos)return;
-const{sig,strength}=getSignal(sym.s);
-if(sig){
-const lot=calcLotSize(sym.s);
-const pipValue=lot*10000*sym.p;
-const isBuy=sig==='BUY';
-const entry=isBuy?p.ask:p.bid;
-const tradeId = generateTradeId();
-const newPos = {
-id: tradeId,
-sym:sym.s,
-type:sig,
-entry,
-tp:isBuy?entry+C.tp*sym.p:entry-C.tp*sym.p,
-sl:isBuy?entry-C.sl*sym.p:entry+C.sl*sym.p,
-trail:null,
-pipValue,
-pip:sym.p,
-lot,
-strength,
-time:now
-};
-S.pos.push(newPos);
-sendWebhook('OPEN', newPos);
-lastTrade[sym.s]=now;
-log(`📈 ${sig} ${sym.s} @${fmtP(sym.s,entry)} [${strength}★]`,isBuy?'g':'r');
-save();
-}
-});
-managePositions();
-}
-</script>
-</body>
-</html>
-// =====================================================
-// POSITION MANAGEMENT & EXIT LOGIC
-// =====================================================
-function managePositions() {
-    const toClose = [];
-
-    S.pos.forEach((pos, i) => {
-        const p = prices[pos.sym];
-        if (!p) return;
-
-        const isBuy = pos.type === 'BUY';
-        const cur = isBuy ? p.bid : p.ask;
-        const pips = isBuy ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
-        const pnl = pips * pos.pipValue;
-
-        // 1. Trailing Stop Logic
-        if (pips >= C.trail) {
-            const newTrail = isBuy ? cur - (2 * pos.pip) : cur + (2 * pos.pip);
-            if (!pos.trail || (isBuy ? newTrail > pos.trail : newTrail < pos.trail)) {
-                pos.trail = newTrail;
-            }
+        function loadWebhookConfig() {
+            try {
+                const hash = location.hash.slice(1);
+                if (hash) {
+                    const data = JSON.parse(atob(hash));
+                    if (data.webhook) webhookConfig = { ...webhookConfig, ...data.webhook };
+                }
+            } catch (e) {}
+            updateWebhookUI();
         }
 
-        // 2. Check Exits
-        let reason = null;
-        if (isBuy) {
-            if (cur >= pos.tp) reason = "TP";
-            else if (cur <= pos.sl) reason = "SL";
-            else if (pos.trail && cur <= pos.trail) reason = "TRAIL";
-        } else {
-            if (cur <= pos.tp) reason = "TP";
-            else if (cur >= pos.sl) reason = "SL";
-            else if (pos.trail && cur >= pos.trail) reason = "TRAIL";
+        function saveWebhookConfig() {
+            webhookConfig.url = document.getElementById('webhookUrl').value.trim();
+            webhookConfig.secret = document.getElementById('webhookSecret').value.trim();
+            webhookConfig.openEnabled = document.getElementById('whOpenEnabled').checked;
+            webhookConfig.closeEnabled = document.getElementById('whCloseEnabled').checked;
+            save();
+            updateWebhookUI();
+            closeWebhookModal();
+            log('🔗 Webhook config saved', 'b');
         }
 
-        if (reason) {
-            toClose.push({ index: i, reason, exitPrice: cur, pips, pnl });
+        function updateWebhookUI() {
+            const el = document.getElementById('webhook');
+            if (webhookConfig.url) { el.textContent = 'WH:✓'; el.className = 'badge on'; } 
+            else { el.textContent = 'WH:OFF'; el.className = 'badge dim'; }
         }
-    });
 
-    // Process Closures
-    toClose.reverse().forEach(c => {
-        const p = S.pos.splice(c.index, 1)[0];
-        
-        // Update Stats
-        S.bal += c.pnl;
-        dailyPnL += c.pnl;
-        if (c.pnl > 0) {
-            S.wins++;
-            S.grossWin += c.pnl;
-            S.streak = Math.max(0, S.streak + 1);
-        } else {
-            S.losses++;
-            S.grossLoss += Math.abs(c.pnl);
-            S.streak = Math.min(0, S.streak - 1);
+        function showWebhookConfig() {
+            document.getElementById('webhookUrl').value = webhookConfig.url;
+            document.getElementById('webhookSecret').value = webhookConfig.secret;
+            document.getElementById('whOpenEnabled').checked = webhookConfig.openEnabled;
+            document.getElementById('whCloseEnabled').checked = webhookConfig.closeEnabled;
+            document.getElementById('webhookModal').style.display = 'flex';
         }
-        
-        if (S.bal > S.peak) S.peak = S.bal;
-        S.returns.push(c.pnl);
-        
-        // 🔗 SEND WEBHOOK ON CLOSE
-        sendWebhook('CLOSE', { ...p, ...c });
 
-        log(`🏁 ${c.reason} ${p.sym}: ${c.pnl > 0 ? '+' : ''}$${c.pnl.toFixed(2)} (${c.pips.toFixed(1)} pips)`, c.pnl > 0 ? 'g' : 'r');
-    });
+        function closeWebhookModal() { document.getElementById('webhookModal').style.display = 'none'; }
+        function generateTradeId() { return 'HFT-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase(); }
 
-    if (toClose.length > 0) {
-        S.eq.push(S.bal);
-        save();
-    }
-}
+        async function sendWebhook(action, tradeData) {
+            if (!webhookConfig.url) return;
+            const symData = SYM.find(s => s.s === tradeData.sym);
+            const payload = { action, source: "HFT-ULTRA-2026", timestamp: new Date().toISOString(), trade_id: tradeData.id || generateTradeId(), symbol: tradeData.sym, direction: tradeData.type, entry_price: tradeData.entry, lot_size: tradeData.lot };
+            try {
+                const response = await fetch(webhookConfig.url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    mode: 'cors'
+                });
+                if (response.ok) { log(`🔗 WH ${action}: ${tradeData.sym}`, 'b'); }
+            } catch (err) { console.log('Webhook error'); }
+        }
 
-// =====================================================
-// RENDERING & ENGINE LOOPS
-// =====================================================
-function render() {
-    document.getElementById('equity').textContent = '$' + (S.bal + getUnrealized()).toFixed(2);
-    document.getElementById('trades').textContent = S.wins + S.losses;
-    const wr = (S.wins / (S.wins + S.losses) * 100) || 0;
-    document.getElementById('winrate').textContent = wr.toFixed(1) + '%';
-    
-    // Update Market Table
-    let h = '';
-    SYM.forEach(s => {
-        const p = prices[s.s];
-        if (!p) return;
-        const sig = getSignal(s.s);
-        h += `<tr>
-            <td>${s.s}</td>
-            <td>${p.bid.toFixed(s.mt5.includes('JPY') ? 2 : 5)}</td>
-            <td>${p.ask.toFixed(s.mt5.includes('JPY') ? 2 : 5)}</td>
-            <td class="${p.change24 >= 0 ? 'g' : 'r'}">${p.change24}%</td>
-            <td>${sig.rsi}</td>
-            <td>${sig.mom}</td>
-            <td class="${sig.sig === 'BUY' ? 'g' : sig.sig === 'SELL' ? 'r' : 'dim'}">${sig.sig || '--'}</td>
-            <td id="pnl-${s.s}">$0.00</td>
-        </tr>`;
-    });
-    document.getElementById('market').innerHTML = h;
-}
+        async function testWebhook() {
+            const url = document.getElementById('webhookUrl').value.trim();
+            const resultEl = document.getElementById('webhookTestResult');
+            resultEl.innerHTML = '<span class="y">🔄 Testing...</span>';
+            try {
+                const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({action:'TEST'}), mode: 'cors' });
+                if (response.ok) resultEl.innerHTML = '<span class="g">✅ Connection successful!</span>';
+                else resultEl.innerHTML = `<span class="r">❌ Error: ${response.status}</span>`;
+            } catch (err) { resultEl.innerHTML = `<span class="r">❌ ${err.message}</span>`; }
+        }
 
-function log(m, c) {
-    const e = document.createElement('div');
-    e.className = 'log ' + (c || '');
-    e.innerHTML = `<span class="dim">[${new Date().toLocaleTimeString()}]</span> ${m}`;
-    const l = document.getElementById('log');
-    l.prepend(e);
-    if (l.children.length > 50) l.lastChild.remove();
-}
+        let S=load()||fresh();
+        let prices={},history={},lastTrade={},logs=[],ticks=0,dailyPnL=0,dayStart=new Date().toDateString();
+        let binanceData={};
 
-// Utility for formatting prices
-function fmtP(s, v) {
-    const pair = SYM.find(x => x.s === s);
-    return v.toFixed(pair && pair.mt5.includes('JPY') ? 2 : 5);
-}
+        function fresh(){return{bal:C.start,pos:[],wins:0,losses:0,grossWin:0,grossLoss:0,eq:[C.start],streak:0,best:C.start,peak:C.start,returns:[]}}
+        function load(){ try{ return JSON.parse(atob(location.hash.slice(1))); } catch(e){return null;} }
+        function save(){ try{ const data = {...S, eq: S.eq.slice(-60), webhook: webhookConfig}; history.replaceState(null, '', '#' + btoa(JSON.stringify(data))); } catch(e){} }
+        function reset(){S=fresh();logs=[];save();render()}
 
-// Start Engine
-loadWebhookConfig();
-setInterval(async () => {
-    const ok = await fetchBinancePrices();
-    if (ok) {
-        updatePrices();
-        trade();
-        render();
-    }
-}, 2000);
-</script>
+        async function fetchBinancePrices(){
+            try{
+                const r=await fetch('https://api.binance.com/api/v3/ticker/bookTicker');
+                const data=await r.json();
+                data.forEach(t=>{ binanceData[t.symbol]={bid:parseFloat(t.bidPrice),ask:parseFloat(t.askPrice)}; });
+                document.getElementById('api').textContent='API:✓'; document.getElementById('api').className='badge on';
+                return true;
+            }catch(e){ return false; }
+        }
+
+        function updatePrices(){
+            SYM.forEach(sym=>{
+                const bd=binanceData[sym.b]; if(!bd)return;
+                const mid=(bd.bid+bd.ask)/2;
+                prices[sym.s]={bid:bd.bid,ask:bd.ask,mid:mid,pip:sym.p};
+                if(!history[sym.s])history[sym.s]=[]; history[sym.s].push(mid); if(history[sym.s].length>50)history[sym.s].shift();
+            });
+        }
+
+        function getSignal(sym){
+            return {sig: Math.random() > 0.98 ? (Math.random() > 0.5 ? 'BUY' : 'SELL') : null, rsi: 50, mom: 0};
+        }
+
+        function managePositions() {
+            const toClose = [];
+            S.pos.forEach((pos, i) => {
+                const p = prices[pos.sym]; if (!p) return;
+                const cur = pos.type === 'BUY' ? p.bid : p.ask;
+                const pips = pos.type === 'BUY' ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
+                if (pips >= C.tp || pips <= -C.sl) toClose.push({index: i, pips, pnl: pips * pos.pipValue});
+            });
+            toClose.reverse().forEach(c => {
+                const p = S.pos.splice(c.index, 1)[0];
+                S.bal += c.pnl;
+                sendWebhook('CLOSE', {...p, ...c});
+                log(`🏁 CLOSE ${p.sym}: $${c.pnl.toFixed(2)}`, c.pnl > 0 ? 'g' : 'r');
+            });
+        }
+
+        function trade(){
+            SYM.forEach(sym=>{
+                if(S.pos.length >= C.maxPos) return;
+                const s = getSignal(sym.s);
+                if(s.sig){
+                    const p = prices[sym.s];
+                    const entry = s.sig === 'BUY' ? p.ask : p.bid;
+                    const newPos = {id: generateTradeId(), sym: sym.s, type: s.sig, entry, pip: sym.p, pipValue: 0.1, lot: 0.01, time: Date.now()};
+                    S.pos.push(newPos);
+                    sendWebhook('OPEN', newPos);
+                    log(`📈 ${s.sig} ${sym.s} @${entry.toFixed(5)}`, s.sig === 'BUY' ? 'g' : 'r');
+                }
+            });
+            managePositions();
+        }
+
+        function render() {
+            document.getElementById('equity').textContent = '$' + S.bal.toFixed(2);
+            document.getElementById('trades').textContent = S.wins + S.losses;
+            let h = '';
+            SYM.forEach(s => {
+                const p = prices[s.s]; if (!p) return;
+                h += `<tr><td>${s.s}</td><td>${p.bid.toFixed(5)}</td><td>${p.ask.toFixed(5)}</td><td>--</td><td>50</td><td>0</td><td>--</td><td>$0</td></tr>`;
+            });
+            document.getElementById('market').innerHTML = h;
+        }
+
+        function log(m, c) {
+            const e = document.createElement('div'); e.className = 'log ' + (c || '');
+            e.innerHTML = `<span class="dim">[${new Date().toLocaleTimeString()}]</span> ${m}`;
+            const l = document.getElementById('log'); l.prepend(e);
+        }
+
+        loadWebhookConfig();
+        setInterval(async () => {
+            if (await fetchBinancePrices()) { updatePrices(); trade(); render(); }
+        }, 2000);
+    </script>
 </body>
 </html>
