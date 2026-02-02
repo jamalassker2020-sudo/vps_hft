@@ -1,211 +1,343 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HFT Ultra FX 2026 - Railway Connected</title>
-<style>
-/* All your CSS styles remain the same */
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0e14;--card:#121820;--border:#1a2030;--txt:#c8d0dc;--dim:#5a6270;--g:#0f6;--r:#f44;--b:#0af;--y:#fc0;--gold:#ffd700}
-html.light{--bg:#f4f6f8;--card:#fff;--border:#dde;--txt:#1a1a2e;--dim:#888}
-body{background:var(--bg);color:var(--txt);font:11px/1.4 monospace;padding:8px;min-height:100vh}
-.g{color:var(--g)}.r{color:var(--r)}.b{color:var(--b)}.y{color:var(--y)}.dim{color:var(--dim)}.gold{color:var(--gold)}
-.card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:8px}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-.col{flex:1;min-width:120px}
-.grid{display:grid;gap:4px}
-.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g6{grid-template-columns:repeat(6,1fr)}
-.stat{background:var(--bg);padding:6px;border-radius:3px;text-align:center}
-.stat small{display:block;font-size:9px;color:var(--dim);margin-bottom:2px}
-.stat b{font-size:13px}
-h1{font-size:14px;margin-bottom:4px}
-table{width:100%;border-collapse:collapse;font-size:10px}
-th,td{padding:4px;text-align:right}
-th{color:var(--dim);font-weight:400;border-bottom:1px solid var(--border)}
-td:first-child,th:first-child{text-align:left}
-tr:hover{background:rgba(255,255,255,.02)}
-.scroll{max-height:200px;overflow-y:auto}
-.bar{height:40px;display:flex;align-items:end;gap:1px}
-.bar div{flex:1;min-width:2px;border-radius:1px 1px 0 0}
-.log{font-size:9px;padding:2px 4px;margin:1px 0;border-radius:2px;background:var(--bg)}
-button{background:var(--card);border:1px solid var(--border);color:var(--txt);padding:4px 8px;border-radius:3px;cursor:pointer;font:inherit}
-button:hover{background:var(--border)}
-.pulse{animation:p 1.5s infinite}@keyframes p{50%{opacity:.5}}
-.badge{display:inline-block;padding:2px 6px;border-radius:3px;font-size:9px}
-.badge.on{background:#0f62;color:var(--g)}.badge.off{background:#f442;color:var(--r)}.badge.warn{background:#fc02;color:var(--y)}.badge.gold{background:#ffd7002a;color:var(--gold)}
-input[type="text"]{background:var(--bg);border:1px solid var(--border);color:var(--txt);padding:4px 8px;border-radius:3px;font:inherit;width:100%;font-size:16px}
-input[type="text"]:focus{outline:none;border-color:var(--b)}
-.webhook-status{font-size:9px;margin-top:4px}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;max-width:400px;width:90%}
-.modal h3{margin-bottom:12px;font-size:14px}
-.modal-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-.profit-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:4px}
-.profit-bar-fill{height:100%;transition:width 0.3s;border-radius:3px}
-.lock-flash{animation:lockFlash 0.5s ease-out}
-@keyframes lockFlash{0%{background:var(--gold);transform:scale(1.05)}100%{background:var(--bg);transform:scale(1)}}
-@media(max-width:600px){.g6{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(2,1fr)}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HFT Ultra FX - Simple Version</title>
+    <style>
+        :root {
+            --bg: #0a0e14;
+            --card: #121820;
+            --border: #1a2030;
+            --txt: #c8d0dc;
+            --green: #0f6;
+            --red: #f44;
+            --blue: #0af;
+            --gold: #ffd700;
+        }
+        
+        body {
+            background: var(--bg);
+            color: var(--txt);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin: 0;
+            padding: 10px;
+        }
+        
+        .header {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+        
+        .g { color: var(--green); }
+        .r { color: var(--red); }
+        .b { color: var(--blue); }
+        .gold { color: var(--gold); }
+        
+        .control-panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        
+        button {
+            background: var(--border);
+            color: var(--txt);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            margin: 2px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        button:hover { background: #1a2530; }
+        
+        .log {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px;
+        }
+    </style>
 </head>
 <body>
-<div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
-<div>
-<h1>⚡ HFT ULTRA <span class="y">FX</span> <span class="gold">RAILWAY CONNECTED</span> <span class="dim">2026</span></h1>
-<small class="dim">28 PAIRS • ACCUMULATING PROFIT LOCK • TIERED TRAILS • BREAK-EVEN LOCK</small>
-</div>
-<div class="row" style="gap:4px">
-<span id="status" class="badge pulse">INIT</span>
-<span id="mode" class="badge">MODE:--</span>
-<span id="api" class="badge dim">API:--</span>
-<span id="webhook" class="badge dim">WH:--</span>
-<span id="shield" class="badge">SHIELD:--</span>
-<button onclick="showWebhookConfig()">⚙️</button>
-<button onclick="reset()">⟲</button>
-</div>
-</div>
-
-<!-- ... (ALL YOUR HTML UI CODE REMAINS THE SAME) ... -->
-
-<script>
-// =====================================================
-// WEBHOOK CONFIGURATION - PRE-CONFIGURED FOR RAILWAY
-// =====================================================
-let webhookConfig = {
-  // Your Railway URL - ALREADY CONFIGURED
-  url: 'https://vpshft-production.up.railway.app/webhook',
-  secret: '',
-  openEnabled: true,
-  closeEnabled: true,
-  lastStatus: null,
-  sentCount: 0,
-  errorCount: 0
-};
-
-// Modified sendWebhook function for Railway
-async function sendWebhook(action, tradeData) {
-  if (!webhookConfig.url) return;
-  if (action === 'OPEN' && !webhookConfig.openEnabled) return;
-  if (action === 'CLOSE' && !webhookConfig.closeEnabled) return;
-
-  const symData = SYM.find(s => s.s === tradeData.sym);
-  
-  const payload = {
-    action: action,
-    source: "HFT-ULTRA-FX-RAILWAY-2026",
-    version: "2.0",
-    timestamp: new Date().toISOString(),
-    timestamp_unix: Date.now(),
-    trade_id: tradeData.id || generateTradeId(),
-    symbol: tradeData.sym,
-    symbol_mt5: symData?.mt5 || tradeData.sym.replace('/', ''),
-    direction: tradeData.type,
-    order_type: tradeData.type === 'BUY' ? 0 : 1,
-    entry_price: tradeData.entry,
-    current_price: tradeData.currentPrice || tradeData.entry,
-    take_profit: tradeData.tp,
-    stop_loss: tradeData.sl,
-    trailing_stop: tradeData.trail || null,
-    lot_size: tradeData.lot,
-    pip_value: tradeData.pipValue,
-    pip_size: tradeData.pip,
-    signal_strength: tradeData.strength || 0,
-    exit_price: action === 'CLOSE' ? tradeData.exitPrice : null,
-    exit_reason: action === 'CLOSE' ? tradeData.reason : null,
-    pnl_pips: action === 'CLOSE' ? tradeData.pips : null,
-    pnl_usd: action === 'CLOSE' ? tradeData.pnl : null,
-    duration_ms: action === 'CLOSE' ? (Date.now() - tradeData.time) : null
-  };
-
-  try {
-    // For Railway HTTPS
-    const response = await fetch(webhookConfig.url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Signal-Source': 'HFT-ULTRA-FX-RAILWAY',
-        'X-Signal-Action': action,
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(payload),
-      mode: 'cors', // Railway supports CORS
-      cache: 'no-cache'
-    });
-
-    if (response.ok) {
-      webhookConfig.sentCount++;
-      webhookConfig.lastStatus = 'OK';
-      log(`✅ WH ${action}: ${tradeData.sym}`, 'g');
-    } else {
-      throw new Error(`HTTP ${response.status}`);
+    <div class="header">
+        <h1 style="margin: 0;">⚡ HFT ULTRA FX 2026</h1>
+        <div style="font-size: 10px; color: #5a6270;">Simple Working Version</div>
+    </div>
+    
+    <div class="stats">
+        <div class="stat-box">
+            <div>EQUITY</div>
+            <div id="equity" class="stat-value g">$100.00</div>
+        </div>
+        <div class="stat-box">
+            <div>TRADES</div>
+            <div id="trades" class="stat-value b">0</div>
+        </div>
+        <div class="stat-box">
+            <div>WIN RATE</div>
+            <div id="winrate" class="stat-value">0%</div>
+        </div>
+        <div class="stat-box">
+            <div>LOCKED</div>
+            <div id="locked" class="stat-value gold">$0.00</div>
+        </div>
+    </div>
+    
+    <div class="control-panel">
+        <h3 style="margin-top: 0;">CONTROLS</h3>
+        <div>
+            <button onclick="startTrading()">▶️ START</button>
+            <button onclick="stopTrading()">⏹️ STOP</button>
+            <button onclick="resetBot()">🔄 RESET</button>
+            <button onclick="testWebhook()">🔗 TEST WEBHOOK</button>
+        </div>
+        <div style="margin-top: 10px;">
+            <input type="text" id="webhookUrl" placeholder="Webhook URL" 
+                   value="http://caboose.proxy.rlwy.net:24843" 
+                   style="width: 300px; padding: 5px; background: var(--bg); color: var(--txt); border: 1px solid var(--border);">
+            <button onclick="saveWebhook()">💾 SAVE</button>
+        </div>
+        <div id="webhookStatus" style="margin-top: 5px; font-size: 10px;"></div>
+    </div>
+    
+    <div class="log" id="log">
+        <div class="log-entry">System started...</div>
+    </div>
+    
+    <script>
+    // ============ CONFIGURATION ============
+    const config = {
+        startBalance: 100,
+        tpPips: 15,
+        slPips: 5,
+        maxPositions: 3,
+        lockStep: 2,
+        lockPercent: 50
+    };
+    
+    // ============ STATE ============
+    let state = {
+        balance: config.startBalance,
+        lockedProfit: 0,
+        lockCount: 0,
+        lastLockLevel: config.startBalance,
+        positions: [],
+        wins: 0,
+        losses: 0,
+        tradingActive: false,
+        webhookUrl: 'http://caboose.proxy.rlwy.net:24843'
+    };
+    
+    // ============ WEBHOOK FUNCTIONS ============
+    async function sendToWebhook(data) {
+        if (!state.webhookUrl) return;
+        
+        try {
+            await fetch(state.webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+                mode: 'no-cors'
+            });
+            log('Webhook sent: ' + data.action, 'b');
+            return true;
+        } catch (err) {
+            log('Webhook error: ' + err.message, 'r');
+            return false;
+        }
     }
-  } catch (err) {
-    webhookConfig.errorCount++;
-    webhookConfig.lastStatus = 'ERR';
-    console.log('Webhook error:', err.message);
-    if (webhookConfig.errorCount <= 3) {
-      log(`⚠️ WH Error: ${err.message}`, 'y');
+    
+    async function testWebhook() {
+        const url = document.getElementById('webhookUrl').value.trim();
+        const statusEl = document.getElementById('webhookStatus');
+        
+        if (!url) {
+            statusEl.innerHTML = '<span class="r">❌ Enter URL</span>';
+            return;
+        }
+        
+        statusEl.innerHTML = '<span class="gold">🔄 Testing...</span>';
+        
+        try {
+            await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({test: true, timestamp: Date.now()}),
+                mode: 'no-cors'
+            });
+            
+            state.webhookUrl = url;
+            statusEl.innerHTML = '<span class="g">✅ Connected!</span>';
+            log('Webhook URL saved: ' + url, 'g');
+        } catch (err) {
+            statusEl.innerHTML = '<span class="r">❌ Connection failed</span>';
+        }
     }
-  }
-}
-
-// Test function for Railway
-async function testWebhook() {
-  const url = document.getElementById('webhookUrl').value.trim() || webhookConfig.url;
-  const resultEl = document.getElementById('webhookTestResult');
-  
-  if (!url) {
-    resultEl.innerHTML = '<span class="r">❌ Please enter a webhook URL</span>';
-    return;
-  }
-
-  resultEl.innerHTML = '<span class="y">🔄 Testing Railway connection...</span>';
-
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Signal-Source': 'HFT-ULTRA-FX-TEST',
-        'X-Signal-Action': 'TEST'
-      },
-      body: JSON.stringify({
-        action: 'TEST',
-        source: 'HFT Ultra FX Railway Bot',
-        timestamp: new Date().toISOString(),
-        message: 'Testing connection to Railway server'
-      }),
-      mode: 'cors'
-    });
-
-    if (response.ok) {
-      const data = await response.text();
-      resultEl.innerHTML = '<span class="g">✅ Railway connection successful!</span>';
-      log('✅ Railway webhook test passed', 'g');
-    } else {
-      resultEl.innerHTML = `<span class="r">❌ Railway Error: ${response.status}</span>`;
+    
+    function saveWebhook() {
+        state.webhookUrl = document.getElementById('webhookUrl').value.trim();
+        log('Webhook URL saved', 'g');
     }
-  } catch (err) {
-    resultEl.innerHTML = `<span class="r">❌ ${err.message}</span>`;
-    log(`❌ Railway test failed: ${err.message}`, 'r');
-  }
-}
-
-// Rest of your JavaScript code remains the same...
-// (All the trading logic, indicators, profit lock system, etc.)
-
-// At the end of init() function, add Railway status:
-async function init(){
-  // ... existing init code ...
-  
-  if(webhookConfig.url.includes('railway')){
-    log('🚂 Connected to Railway: ' + webhookConfig.url, 'b');
-    log('📡 Sending signals to MT5 via Railway', 'g');
-  }
-}
-
-// Start the bot
-init();
-</script>
+    
+    // ============ TRADING FUNCTIONS ============
+    function simulateTrade() {
+        if (!state.tradingActive) return;
+        
+        const equity = state.balance;
+        
+        // Check for profit lock
+        if (equity >= state.lastLockLevel + config.lockStep) {
+            const lockAmount = config.lockStep * (config.lockPercent / 100);
+            state.lockedProfit += lockAmount;
+            state.lockCount++;
+            state.lastLockLevel += config.lockStep;
+            
+            log(`🔒 LOCK #${state.lockCount}: +$${lockAmount.toFixed(2)}`, 'gold');
+            
+            // Send lock event to webhook
+            sendToWebhook({
+                action: 'LOCK',
+                amount: lockAmount,
+                totalLocked: state.lockedProfit,
+                lockCount: state.lockCount
+            });
+        }
+        
+        // Simulate a trade (50/50 win/loss)
+        if (Math.random() > 0.5) {
+            // Win
+            const profit = 2 + Math.random() * 3;
+            state.balance += profit;
+            state.wins++;
+            
+            // Send trade to webhook
+            sendToWebhook({
+                action: 'TRADE',
+                result: 'WIN',
+                profit: profit,
+                balance: state.balance
+            });
+            
+            log(`✅ WIN: +$${profit.toFixed(2)}`, 'g');
+        } else {
+            // Loss
+            const loss = 1 + Math.random() * 2;
+            state.balance -= loss;
+            state.losses++;
+            
+            sendToWebhook({
+                action: 'TRADE',
+                result: 'LOSS',
+                loss: loss,
+                balance: state.balance
+            });
+            
+            log(`❌ LOSS: -$${loss.toFixed(2)}`, 'r');
+        }
+        
+        updateUI();
+    }
+    
+    // ============ UI FUNCTIONS ============
+    function log(message, colorClass = '') {
+        const logEl = document.getElementById('log');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        if (colorClass) entry.classList.add(colorClass);
+        entry.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+        logEl.appendChild(entry);
+        logEl.scrollTop = logEl.scrollHeight;
+    }
+    
+    function updateUI() {
+        document.getElementById('equity').textContent = '$' + state.balance.toFixed(2);
+        document.getElementById('equity').className = state.balance >= config.startBalance ? 'stat-value g' : 'stat-value r';
+        document.getElementById('trades').textContent = state.wins + state.losses;
+        document.getElementById('winrate').textContent = state.wins + state.losses > 0 
+            ? Math.round(state.wins / (state.wins + state.losses) * 100) + '%' 
+            : '0%';
+        document.getElementById('locked').textContent = '$' + state.lockedProfit.toFixed(2);
+    }
+    
+    // ============ CONTROL FUNCTIONS ============
+    function startTrading() {
+        state.tradingActive = true;
+        log('Trading STARTED', 'g');
+        
+        // Start trading loop
+        tradingInterval = setInterval(() => {
+            if (state.tradingActive) {
+                simulateTrade();
+            }
+        }, 2000); // Trade every 2 seconds
+    }
+    
+    function stopTrading() {
+        state.tradingActive = false;
+        if (tradingInterval) clearInterval(tradingInterval);
+        log('Trading STOPPED', 'r');
+    }
+    
+    function resetBot() {
+        stopTrading();
+        state = {
+            balance: config.startBalance,
+            lockedProfit: 0,
+            lockCount: 0,
+            lastLockLevel: config.startBalance,
+            positions: [],
+            wins: 0,
+            losses: 0,
+            tradingActive: false,
+            webhookUrl: state.webhookUrl
+        };
+        document.getElementById('log').innerHTML = '<div class="log-entry">System reset...</div>';
+        updateUI();
+        log('Bot RESET', 'b');
+    }
+    
+    // ============ INITIALIZE ============
+    let tradingInterval;
+    updateUI();
+    log('System ready. Click START to begin.', 'b');
+    </script>
 </body>
 </html>
