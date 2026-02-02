@@ -3,201 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>HFT Ultra MT5 - Valetax Live</title>
+    <title>HFT Ultra 2026 | WebSocket Edition</title>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        :root{--bg:#0a0e14;--card:#121820;--border:#1a2030;--txt:#c8d0dc;--dim:#5a6270;--g:#0f6;--r:#f44;--b:#0af;--y:#fc0}
-        html.light{--bg:#f4f6f8;--card:#fff;--border:#dde;--txt:#1a1a2e;--dim:#888}
-        body{background:var(--bg);color:var(--txt);font:11px/1.4 monospace;padding:8px;min-height:100vh}
-        .g{color:var(--g)}.r{color:var(--r)}.b{color:var(--b)}.y{color:var(--y)}.dim{color:var(--dim)}
-        .card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:8px}
-        .row{display:flex;gap:8px;flex-wrap:wrap}
-        .col{flex:1;min-width:120px}
-        .grid{display:grid;gap:4px}
-        .g6{grid-template-columns:repeat(6,1fr)}
-        .stat{background:var(--bg);padding:6px;border-radius:3px;text-align:center}
-        .stat small{display:block;font-size:9px;color:var(--dim);margin-bottom:2px}
-        .stat b{font-size:13px}
-        h1{font-size:14px;margin-bottom:4px}
-        table{width:100%;border-collapse:collapse;font-size:10px}
-        th,td{padding:4px;text-align:right}
-        th{color:var(--dim);font-weight:400;border-bottom:1px solid var(--border)}
-        td:first-child,th:first-child{text-align:left}
-        .scroll{max-height:200px;overflow-y:auto}
-        .log{font-size:9px;padding:2px 4px;margin:1px 0;border-radius:2px;background:var(--bg)}
-        button{background:var(--card);border:1px solid var(--border);color:var(--txt);padding:4px 8px;border-radius:3px;cursor:pointer;font:inherit}
-        .pulse{animation:p 1.5s infinite}@keyframes p{50%{opacity:.5}}
-        .badge{display:inline-block;padding:2px 6px;border-radius:3px;font-size:9px}
-        .badge.on{background:#0f62;color:var(--g)}.badge.off{background:#f442;color:var(--r)}.badge.warn{background:#fc02;color:var(--y)}
-        input[type="text"]{background:var(--bg);border:1px solid var(--border);color:var(--txt);padding:4px 8px;border-radius:3px;font:inherit;width:100%}
-        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}
-        .modal{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;width:90%;max-width:400px}
+        /* CSS remains largely the same for UI consistency */
+        *{margin:0;padding:0;box-sizing:border-box}:root{--bg:#0a0e14;--card:#121820;--border:#1a2030;--txt:#c8d0dc;--dim:#5a6270;--g:#0f6;--r:#f44;--b:#0af;--y:#fc0}html.light{--bg:#f4f6f8;--card:#fff;--border:#dde;--txt:#1a1a2e;--dim:#888}body{background:var(--bg);color:var(--txt);font:11px/1.4 monospace;padding:8px;min-height:100vh}.g{color:var(--g)}.r{color:var(--r)}.b{color:var(--b)}.y{color:var(--y)}.dim{color:var(--dim)}.card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:8px}.row{display:flex;gap:8px;flex-wrap:wrap}.col{flex:1;min-width:120px}.grid{display:grid;gap:4px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g6{grid-template-columns:repeat(6,1fr)}.stat{background:var(--bg);padding:6px;border-radius:3px;text-align:center}.stat small{display:block;font-size:9px;color:var(--dim);margin-bottom:2px}.stat b{font-size:13px}h1{font-size:14px;margin-bottom:4px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{padding:4px;text-align:right}th{color:var(--dim);font-weight:400;border-bottom:1px solid var(--border)}td:first-child,th:first-child{text-align:left}tr:hover{background:rgba(255,255,255,.02)}.scroll{max-height:200px;overflow-y:auto}.log{font-size:9px;padding:2px 4px;margin:1px 0;border-radius:2px;background:var(--bg)}button{background:var(--card);border:1px solid var(--border);color:var(--txt);padding:4px 8px;border-radius:3px;cursor:pointer;font:inherit}button:hover{background:var(--border)}.pulse{animation:p 1.5s infinite}@keyframes p{50%{opacity:.5}}.badge{display:inline-block;padding:2px 6px;border-radius:3px;font-size:9px}.badge.on{background:#0f62;color:var(--g)}.badge.off{background:#f442;color:var(--r)}.badge.warn{background:#fc02;color:var(--y)}input[type="text"]{background:var(--bg);border:1px solid var(--border);color:var(--txt);padding:4px 8px;border-radius:3px;font:inherit;width:100%;font-size:16px}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}.modal{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;max-width:400px;width:90%}
     </style>
 </head>
 <body>
     <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div>
-            <h1>⚡ HFT FX-ULTRA <span class="dim">2026</span></h1>
-            <small class="dim">VALETAX LIVE • 641086382 • FOREX & GOLD • MT5 WEBHOOK</small>
-        </div>
+        <div><h1>⚡ HFT ULTRA <span class="dim">WS-2026</span></h1><small class="dim">REAL-TIME WEBSOCKET ENGINE • SMART RISK</small></div>
         <div class="row" style="gap:4px">
             <span id="status" class="badge pulse">INIT</span>
-            <span id="api" class="badge dim">DATA:--</span>
-            <span id="webhook" class="badge dim">WH:--</span>
+            <span id="api" class="badge dim">WS:OFF</span>
+            <span id="webhook" class="badge dim">WH:OFF</span>
+            <span id="shield" class="badge">SHIELD:--</span>
             <button onclick="showWebhookConfig()">⚙️</button>
             <button onclick="reset()">⟲</button>
         </div>
     </div>
 
     <div class="grid g6" style="margin-bottom:8px">
-        <div class="stat"><small>💰 EQUITY</small><b id="equity" class="g">$0.00</b></div>
+        <div class="stat"><small>💰 EQUITY</small><b id="equity" class="g">$100.00</b></div>
         <div class="stat"><small>TRADES</small><b id="trades" class="b">0</b></div>
         <div class="stat"><small>WIN%</small><b id="winrate" class="y">0%</b></div>
         <div class="stat"><small>OPEN</small><b id="openPos" class="b">0/6</b></div>
-        <div class="stat"><small>LOT</small><b id="curLot" class="g">0.01</b></div>
-        <div class="stat"><small>SERVER</small><b style="font-size:9px">VALETAX-L3</b></div>
+        <div class="stat"><small>DD</small><b id="dd" class="r">0%</b></div>
+        <div class="stat"><small>STREAK</small><b id="streak">0</b></div>
     </div>
 
     <div class="row">
         <div class="col" style="flex:3">
             <div class="card">
-                <div class="row" style="justify-content:space-between;margin-bottom:4px"><b class="b">📊 FX MARKET</b><span id="time" class="dim">--:--:--</span></div>
-                <div class="scroll"><table><thead><tr><th>SYMBOL</th><th>BID</th><th>ASK</th><th>SPREAD</th><th>RSI</th><th>SIGNAL</th></tr></thead><tbody id="market"></tbody></table></div>
+                <div class="row" style="justify-content:space-between;margin-bottom:4px"><b class="b">📊 MARKET (LIVESTREAM)</b></div>
+                <div class="scroll">
+                    <table>
+                        <thead><tr><th>SYM</th><th>PRICE</th><th>Δ 24H</th><th>RSI</th><th>MOM</th><th>SIG</th></tr></thead>
+                        <tbody id="market"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
         <div class="col">
-            <div class="card"><b>📈 MT5 POSITIONS</b><div id="positions" class="scroll"></div></div>
-            <div class="card"><b>⚡ LOG</b><div id="log" class="scroll"></div></div>
+            <div class="card"><b>⚡ ACTIVITY LOG</b><div id="log" class="scroll" style="margin-top:4px"></div></div>
         </div>
     </div>
 
     <div id="webhookModal" class="modal-overlay" style="display:none">
         <div class="modal">
-            <h3>🔗 MT5 Webhook Configuration</h3>
-            <input type="text" id="webhookUrl" placeholder="http://your-railway-url.com" style="margin-bottom:10px">
-            <div class="modal-buttons">
-                <button onclick="testWebhook()">🧪 Test</button>
-                <button onclick="saveWebhookConfig()">💾 Save</button>
-                <button onclick="closeWebhookModal()">✕</button>
-            </div>
+            <h3>🔗 MT5 Webhook</h3>
+            <input type="text" id="webhookUrl" placeholder="http://localhost:8080/webhook" style="margin-bottom:10px">
+            <div class="modal-buttons"><button onclick="saveWebhookConfig()">💾 Save</button><button onclick="closeWebhookModal()">✕</button></div>
         </div>
     </div>
 
     <script>
-        // VALETAX BROKER CONFIG
-        const BROKER = {
-            login: "641086382",
-            pass: "EJam123!@",
-            server: "ValetaxGlobal-Live3"
-        };
-
-        // Forex Pairs & Gold (p: pip size)
+        // CONFIGURATION
         const SYM = [
-            {s:'XAU/USD', b:'XAUUSD', p:0.01, t:'metal'},
-            {s:'EUR/USD', b:'EURUSD', p:0.0001, t:'major'},
-            {s:'GBP/USD', b:'GBPUSD', p:0.0001, t:'major'},
-            {s:'USD/JPY', b:'USDJPY', p:0.01, t:'major'},
-            {s:'AUD/USD', b:'AUDUSD', p:0.0001, t:'major'},
-            {s:'USD/CAD', b:'USDCAD', p:0.0001, t:'major'},
-            {s:'EUR/GBP', b:'EURGBP', p:0.0001, t:'cross'},
-            {s:'GBP/JPY', b:'GBPJPY', p:0.01, t:'cross'},
-            {s:'EUR/JPY', b:'EURJPY', p:0.01, t:'cross'}
+            {s:'BTC/USDT',b:'btcusdt',p:0.01,mt5:'BTCUSD'},
+            {s:'ETH/USDT',b:'ethusdt',p:0.01,mt5:'ETHUSD'},
+            {s:'SOL/USDT',b:'solusdt',p:0.01,mt5:'SOLUSD'},
+            {s:'BNB/USDT',b:'bnbusdt',p:0.01,mt5:'BNBUSD'},
+            {s:'XRP/USDT',b:'xrpusdt',p:0.0001,mt5:'XRPUSD'}
         ];
 
-// ... (Keep BROKER and SYM constants as they are)
+        const C = {
+            start: 100, baseLot: 0.01, tp: 15, sl: 5, trail: 6, maxPos: 6,
+            maxDD: 5, cooldown: 2000, rsiPeriod: 14, minStrength: 3
+        };
 
-        let S = { bal: 0, pos: [], wins: 0, losses: 0 };
+        let S = { bal: 100, pos: [], wins: 0, losses: 0, streak: 0, peak: 100 };
         let prices = {};
-        let webhookConfig = { url: localStorage.getItem('wh_url') || '' };
+        let history = {};
+        let lastTrade = {};
+        let ws = null;
+        let webhookConfig = { url: '', openEnabled: true, closeEnabled: true };
 
-        // FIX: Added a CORS proxy toggle to bypass browser security if needed
-        const USE_PROXY = "https://cors-anywhere.herokuapp.com/"; 
+        // WEBSOCKET ENGINE
+        function initWebSocket() {
+            const streams = SYM.map(s => `${s.b}@ticker`).join('/');
+            ws = new WebSocket(`wss://stream.binance.com:9443/ws/${streams}`);
 
-        async function sendMT5Command(action, data) {
-            if(!webhookConfig.url) return;
-            
-            // Clean the URL: ensure it starts with http/https
-            let targetUrl = webhookConfig.url.trim();
-            if (!targetUrl.startsWith('http')) targetUrl = 'http://' + targetUrl;
-
-            const payload = {
-                action: action,
-                account: BROKER.login,
-                password: BROKER.pass,
-                server: BROKER.server,
-                symbol: data.sym.replace('/',''),
-                type: data.type,
-                lots: 0.01,
-                magic: 2026,
-                trade_id: data.id
+            ws.onopen = () => {
+                document.getElementById('api').textContent = 'WS:ON';
+                document.getElementById('api').className = 'badge on';
+                log("High-speed stream connected", "g");
             };
 
-            try {
-                // Using 'no-cors' mode can help with sending, but you won't see the response body
-                const res = await fetch(targetUrl, {
-                    method: 'POST',
-                    mode: 'cors', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+            ws.onmessage = (e) => {
+                const d = JSON.parse(e.data);
+                const pair = SYM.find(s => s.b === d.s.toLowerCase());
+                if (!pair) return;
+
+                // Update local price state
+                const mid = (parseFloat(d.b) + parseFloat(d.a)) / 2;
+                prices[pair.s] = {
+                    bid: parseFloat(d.b),
+                    ask: parseFloat(d.a),
+                    mid: mid,
+                    change24: d.P,
+                    pip: pair.p
+                };
+
+                updateHistory(pair.s, mid);
+                tradeLogic(pair.s); // Run logic every tick
+            };
+
+            ws.onclose = () => {
+                document.getElementById('api').className = 'badge off';
+                setTimeout(initWebSocket, 5000); // Auto-reconnect
+            };
+        }
+
+        function updateHistory(sym, price) {
+            if (!history[sym]) history[sym] = [];
+            history[sym].push(price);
+            if (history[sym].length > 50) history[sym].shift();
+        }
+
+        // CALCULATION LOGIC
+        function calcRSI(sym) {
+            const h = history[sym];
+            if (!h || h.length < C.rsiPeriod) return 50;
+            let g = 0, l = 0;
+            for (let i = 1; i < h.length; i++) {
+                let d = h[i] - h[i-1];
+                d > 0 ? g += d : l -= d;
+            }
+            return l === 0 ? 100 : 100 - (100 / (1 + (g / l)));
+        }
+
+        // CORE TRADING
+        function tradeLogic(sym) {
+            const p = prices[sym];
+            if (!p || S.pos.length >= C.maxPos) return;
+
+            const rsi = calcRSI(sym);
+            const now = Date.now();
+
+            if (lastTrade[sym] && now - lastTrade[sym] < C.cooldown) return;
+
+            let sig = null;
+            if (rsi < 25) sig = 'BUY';
+            if (rsi > 75) sig = 'SELL';
+
+            if (sig) {
+                const entry = sig === 'BUY' ? p.ask : p.bid;
+                const pos = {
+                    id: 'HFT-' + Math.random().toString(36).substr(2,5).toUpperCase(),
+                    sym, type: sig, entry, pip: p.pip,
+                    tp: sig === 'BUY' ? entry + (C.tp * p.pip) : entry - (C.tp * p.pip),
+                    sl: sig === 'BUY' ? entry - (C.sl * p.pip) : entry + (C.sl * p.pip),
+                    pipValue: C.baseLot * 10,
+                    time: now
+                };
+                S.pos.push(pos);
+                lastTrade[sym] = now;
+                sendWebhook('OPEN', pos);
+                log(`🚀 ${sig} ${sym} @ ${entry.toFixed(4)}`, 'b');
+            }
+            manageExits();
+        }
+
+        function manageExits() {
+            S.pos.forEach((pos, i) => {
+                const p = prices[pos.sym];
+                if (!p) return;
+                const cur = pos.type === 'BUY' ? p.bid : p.ask;
+                const pips = pos.type === 'BUY' ? (cur - pos.entry) / pos.pip : (pos.entry - cur) / pos.pip;
                 
-                if(res.ok || res.status === 0) { // status 0 is common for opaque responses
-                    log(`🚀 MT5 ${action} SENT: ${data.sym}`, 'g');
-                    document.getElementById('webhook').textContent = 'WH:OK';
-                    document.getElementById('webhook').className = 'badge on';
-                } else {
-                    log(`❌ SERVER ERROR: ${res.status}`, 'r');
+                let close = false;
+                if (pos.type === 'BUY' && (cur >= pos.tp || cur <= pos.sl)) close = true;
+                if (pos.type === 'SELL' && (cur <= pos.tp || cur >= pos.sl)) close = true;
+
+                if (close) {
+                    const pnl = pips * pos.pipValue;
+                    S.bal += pnl;
+                    pnl > 0 ? S.wins++ : S.losses++;
+                    sendWebhook('CLOSE', {...pos, pnl});
+                    log(`🏁 CLOSE ${pos.sym}: $${pnl.toFixed(2)}`, pnl > 0 ? 'g' : 'r');
+                    S.pos.splice(i, 1);
                 }
-            } catch(e) { 
-                log(`📡 WEBHOOK BLOCK: Check Browser Console (F12)`, 'y'); 
-                document.getElementById('webhook').textContent = 'WH:ERR';
-                document.getElementById('webhook').className = 'badge off';
-            }
+            });
         }
 
-        // Updated Test Function with better feedback
-        async function testWebhook() {
-            const urlInput = document.getElementById('webhookUrl').value;
-            if(!urlInput) return alert("Enter URL first");
+        // WEBHOOKS & UI
+        async function sendWebhook(action, data) {
+            if (!webhookConfig.url) return;
+            fetch(webhookConfig.url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({action, ...data})
+            }).catch(e => console.error("Webhook Failed"));
+        }
+
+        function renderUI() {
+            document.getElementById('equity').textContent = '$' + S.bal.toFixed(2);
+            document.getElementById('trades').textContent = S.wins + S.losses;
+            document.getElementById('openPos').textContent = `${S.pos.length}/${C.maxPos}`;
             
-            log("Testing connection...", "dim");
-            try {
-                const controller = new AbortController();
-                const id = setTimeout(() => controller.abort(), 5000); // 5s timeout
-
-                const res = await fetch(urlInput, { 
-                    method: 'POST', 
-                    mode: 'no-cors', // Bypasses most CORS blocks for testing
-                    body: JSON.stringify({test: true}) 
-                });
-                
-                clearTimeout(id);
-                log("✅ Connection Path Open!", "g");
-                alert("Connection attempt successful! Check Railway logs to confirm receipt.");
-            } catch(e) {
-                log("❌ Connection Blocked: " + e.message, "r");
-                alert("Failed: Check if the URL is correct and the service is running.");
-            }
+            let h = '';
+            SYM.forEach(s => {
+                const p = prices[s.s] || {mid:0, change24:0};
+                const rsi = Math.round(calcRSI(s.s));
+                h += `<tr>
+                    <td>${s.s}</td>
+                    <td>${p.mid.toFixed(2)}</td>
+                    <td class="${p.change24 > 0 ? 'g' : 'r'}">${p.change24}%</td>
+                    <td>${rsi}</td>
+                    <td>--</td>
+                    <td class="${rsi < 30 ? 'g' : rsi > 70 ? 'r' : ''}">${rsi < 30 ? 'BUY' : rsi > 70 ? 'SELL' : '--'}</td>
+                </tr>`;
+            });
+            document.getElementById('market').innerHTML = h;
         }
 
-        function saveWebhookConfig() {
-            const url = document.getElementById('webhookUrl').value;
-            localStorage.setItem('wh_url', url);
-            webhookConfig.url = url;
+        function log(m, c) {
+            const l = document.getElementById('log');
+            const e = document.createElement('div');
+            e.className = `log ${c}`;
+            e.innerHTML = `<span class="dim">[${new Date().toLocaleTimeString()}]</span> ${m}`;
+            l.prepend(e);
+        }
+
+        function showWebhookConfig() { document.getElementById('webhookModal').style.display = 'flex'; }
+        function closeWebhookModal() { document.getElementById('webhookModal').style.display = 'none'; }
+        function saveWebhookConfig() { 
+            webhookConfig.url = document.getElementById('webhookUrl').value; 
             closeWebhookModal();
-            log("Config Saved: " + url, "b");
-            // Immediate status update
-            document.getElementById('webhook').textContent = 'WH:SET';
-            document.getElementById('webhook').className = 'badge warn';
+            log("Webhook URL Updated", "b");
         }
+        function reset() { location.reload(); }
 
-        // ... (Keep the rest of your render and interval logic)
-
-        setInterval(async () => {
-            await fetchFXPrices();
-            tradeLogic();
-            render();
-        }, 2000);
+        // START ENGINE
+        initWebSocket();
+        setInterval(renderUI, 500); // Smooth UI updates
     </script>
 </body>
 </html>
